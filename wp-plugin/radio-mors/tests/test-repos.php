@@ -1,5 +1,5 @@
 <?php
-class Test_Repos extends WP_UnitTestCase {
+class Test_Repos extends Mors_TestCase {
     public function setUp(): void { parent::setUp(); \Mors\Activator::activate(); }
 
     public function test_current_edition_returned() {

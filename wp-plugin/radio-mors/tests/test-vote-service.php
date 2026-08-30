@@ -1,5 +1,5 @@
 <?php
-class Test_Vote_Service extends WP_UnitTestCase {
+class Test_Vote_Service extends Mors_TestCase {
     private $editionId; private $entryIds;
     public function setUp(): void {
         parent::setUp();

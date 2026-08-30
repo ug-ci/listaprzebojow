@@ -1,5 +1,5 @@
 <?php
-class Test_Activator extends WP_UnitTestCase {
+class Test_Activator extends Mors_TestCase {
     public function test_tables_created_and_edition_seeded() {
         global $wpdb;
         \Mors\Activator::activate();
