@@ -63,6 +63,9 @@ class Test_Rest_Editors extends Mors_TestCase {
         $this->assertSame( 'Jan Kowalski', $editor['fullName'] );
         $this->assertSame( 'MUSIC_EDITOR', $editor['role'] );
         $this->assertTrue( $editor['isActive'] );
+        // Wire format: ISO-8601 Zulu, nie surowy user_registered ze spacją.
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $editor['createdAt'] );
 
         $userId = $editor['id'];
         $this->assertTrue( user_can( $userId, \Mors_Enum::CAP_EDIT_MUSIC ) );

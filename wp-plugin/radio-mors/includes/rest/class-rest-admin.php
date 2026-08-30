@@ -439,7 +439,7 @@ class Admin {
             'fullName'  => $u->display_name,
             'role'      => $role,
             'isActive'  => true,
-            'createdAt' => $u->user_registered,
+            'createdAt' => \mors_to_iso8601( $u->user_registered ),
         ];
     }
 

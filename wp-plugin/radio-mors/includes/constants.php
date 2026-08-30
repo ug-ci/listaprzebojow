@@ -9,6 +9,23 @@ final class Mors_Enum {
     const CAP_MANAGE       = 'mors_manage_editors';
 }
 
+if ( ! function_exists( 'mors_to_iso8601' ) ) {
+    /**
+     * Konwertuje przechowywany naiwny datetime UTC ('Y-m-d H:i:s') na ISO-8601
+     * Zulu do serializacji dla klienta. SPA parsuje wartości przez `new Date(...)`,
+     * które oczekuje ISO-8601 — format ze spacją jest odczytywany jako czas
+     * lokalny w Chrome/Firefox i jako Invalid Date w Safari/iOS. Wartości
+     * używane do porównań po stronie serwera (cooldown) mają zostać w formacie
+     * naiwnym — ta funkcja dotyczy wyłącznie tego, co trafia do JSON.
+     */
+    function mors_to_iso8601( $mysql_utc ) {
+        if ( empty( $mysql_utc ) ) { return null; }
+        $ts = strtotime( $mysql_utc . ' UTC' );
+        if ( $ts === false ) { return null; }
+        return gmdate( 'Y-m-d\TH:i:s\Z', $ts );
+    }
+}
+
 if ( ! function_exists( 'mors_parse_duration' ) ) {
     /**
      * Parsuje czas trwania w formacie "m:ss" na sekundy. Port parseDuration()

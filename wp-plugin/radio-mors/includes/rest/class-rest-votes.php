@@ -76,7 +76,7 @@ class Votes {
         $next       = null;
         if ( $voter && strtotime( $voter['next_eligible_vote_at'] . ' UTC' ) > time() ) {
             $inCooldown = true;
-            $next       = $voter['next_eligible_vote_at'];
+            $next       = \mors_to_iso8601( $voter['next_eligible_vote_at'] );
         }
 
         return new \WP_REST_Response( [

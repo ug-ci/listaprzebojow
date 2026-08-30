@@ -44,7 +44,7 @@ class Chart {
                 'id'              => $ed['id'],
                 'number'          => isset( $ed['edition_number'] ) ? (int) $ed['edition_number'] : null,
                 'title'           => isset( $ed['title'] ) ? $ed['title'] : null,
-                'endsAt'          => isset( $ed['voting_ends_at'] ) ? $ed['voting_ends_at'] : null,
+                'endsAt'          => isset( $ed['voting_ends_at'] ) ? \mors_to_iso8601( $ed['voting_ends_at'] ) : null,
                 'status'          => isset( $ed['status'] ) ? $ed['status'] : null,
                 'totalVotesCount' => $totalVotes,
                 'onlineListeners' => 300 + wp_rand( 0, 89 ),

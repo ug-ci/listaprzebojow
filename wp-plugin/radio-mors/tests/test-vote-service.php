@@ -21,6 +21,9 @@ class Test_Vote_Service extends Mors_TestCase {
         $out = $svc->cast( [ $this->entryIds[0], $this->entryIds[1] ], 'hashA', '1.2.3.4', 'UA' );
         $this->assertTrue( $out['success'] );
         $this->assertNotEmpty( $out['nextEligibleVoteAt'] );
+        // Wire format: ISO-8601 Zulu, nie surowy 'Y-m-d H:i:s' z DB.
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $out['nextEligibleVoteAt'] );
         $voter = ( new \Mors\Db\Votes_Repo() )->find_voter( 'hashA' );
         $this->assertNotNull( $voter );
     }
@@ -42,6 +45,8 @@ class Test_Vote_Service extends Mors_TestCase {
             $this->fail( 'Powinien rzucić COOLDOWN' );
         } catch ( \Mors\Domain\Vote_Exception $e ) {
             $this->assertSame( 'COOLDOWN', $e->code );
+            $this->assertMatchesRegularExpression(
+                '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $e->nextEligibleVoteAt );
         }
     }
 }

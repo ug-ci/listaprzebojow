@@ -18,6 +18,8 @@ class Test_Rest_Public extends Mors_TestCase {
         $this->assertArrayHasKey( 'number', $data['edition'] );
         $this->assertIsInt( $data['edition']['number'] );
         $this->assertArrayHasKey( 'endsAt', $data['edition'] );
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $data['edition']['endsAt'] );
         $this->assertArrayHasKey( 'status', $data['edition'] );
         $this->assertArrayHasKey( 'totalVotesCount', $data['edition'] );
         $this->assertArrayHasKey( 'onlineListeners', $data['edition'] );
@@ -108,14 +110,20 @@ class Test_Rest_Public extends Mors_TestCase {
     public function test_voter_status_in_cooldown_when_future_next_eligible() {
         $_SERVER['REMOTE_ADDR'] = '203.0.113.9';
         $hash = \Mors\Auth\Request_Identity::voter_hash();
-        $future = gmdate( 'Y-m-d H:i:s', time() + 3600 );
+        $futureTs = time() + 3600;
+        $future = gmdate( 'Y-m-d H:i:s', $futureTs );
         ( new \Mors\Db\Votes_Repo() )->upsert_voter( $hash, gmdate( 'Y-m-d H:i:s' ), $future );
 
         $req = new WP_REST_Request( 'GET', '/mors/v1/voter/status' );
         $res = rest_do_request( $req );
         $data = $res->get_data();
         $this->assertTrue( $data['inCooldown'] );
-        $this->assertSame( $future, $data['nextEligibleVoteAt'] );
+        // Serializowana wartość musi być ISO-8601 Zulu, nie surowym MySQL datetime
+        // (naiwny format ze spacją jest odczytywany jako czas lokalny przez
+        // `new Date(...)` w SPA, a na Safari daje Invalid Date).
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $data['nextEligibleVoteAt'] );
+        $this->assertSame( gmdate( 'Y-m-d\TH:i:s\Z', $futureTs ), $data['nextEligibleVoteAt'] );
     }
 
     public function test_votes_status_alias_route_registered() {
@@ -138,7 +146,14 @@ class Test_Rest_Public extends Mors_TestCase {
             $r->set_body( wp_json_encode( [ 'trackIds' => [ $e['id'] ] ] ) );
             return rest_do_request( $r );
         };
-        $this->assertSame( 200, $mk()->get_status() );
-        $this->assertSame( 429, $mk()->get_status() );
+        $first = $mk();
+        $this->assertSame( 200, $first->get_status() );
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $first->get_data()['nextEligibleVoteAt'] );
+
+        $second = $mk();
+        $this->assertSame( 429, $second->get_status() );
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $second->get_data()['nextEligibleVoteAt'] );
     }
 }

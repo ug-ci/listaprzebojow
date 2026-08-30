@@ -42,7 +42,8 @@ class Vote_Service {
             $existing = $votesRepo->find_voter_for_update( $hash );
             if ( $existing && strtotime( $existing['next_eligible_vote_at'] . ' UTC' ) > time() ) {
                 throw new Vote_Exception( 'COOLDOWN',
-                    'Twój limit głosów na 24h jest obecnie aktywny.', 429, $existing['next_eligible_vote_at'] );
+                    'Twój limit głosów na 24h jest obecnie aktywny.', 429,
+                    \mors_to_iso8601( $existing['next_eligible_vote_at'] ) );
             }
             $voter = $votesRepo->upsert_voter( $hash, $now, $next );
             foreach ( $entries as $e ) {
@@ -60,7 +61,7 @@ class Vote_Service {
         return [
             'success' => true,
             'message' => 'Głosy zostały pomyślnie zarejestrowane. Dziękujemy!',
-            'nextEligibleVoteAt' => $next,
+            'nextEligibleVoteAt' => \mors_to_iso8601( $next ),
             'updatedEntries' => array_map( function ( $e ) {
                 return [ 'id' => $e['id'], 'votes' => (int) $e['votes_count'] ];
             }, $updated ),
