@@ -16,7 +16,7 @@ const API_BASE = (window.morsData && window.morsData.restUrl) || '/wp-json/mors/
  */
 function morsCreateIcons() {
   if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
-    morsCreateIcons();
+    lucide.createIcons();
   }
 }
 
