@@ -87,7 +87,13 @@ class StudentRadioApp {
 
   // --- API HELPERS ---
   async apiGet(path) {
-    const res = await fetch(`${API_BASE}${path}`, { credentials: 'include' });
+    // Wysyłamy nonce zawsze — trasy admina (np. /admin/tracks, /admin/editors)
+    // wymagają go do weryfikacji przez require_cap/require_manage; publiczne
+    // GET-y go ignorują, więc jest to nieszkodliwe.
+    const res = await fetch(`${API_BASE}${path}`, {
+      credentials: 'include',
+      headers: { 'X-WP-Nonce': (window.morsData && window.morsData.nonce) || '' },
+    });
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok, status: res.status, data };
   }

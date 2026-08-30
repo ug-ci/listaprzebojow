@@ -9,7 +9,9 @@ class Plugin {
     public function boot() {
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
         \Mors\Frontend\Shortcode::register();
-        // Kolejne taski dokładają tu rejestracje (admin_menu).
+        if ( is_admin() ) {
+            \Mors\Admin\Admin_Page::register();
+        }
     }
 
     public function register_rest_routes() {
