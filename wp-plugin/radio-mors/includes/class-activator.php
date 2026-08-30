@@ -7,6 +7,7 @@ class Activator {
         Schema::create_tables();
         Capabilities::add();
         self::seed_first_edition();
+        update_option( 'mors_db_version', MORS_VERSION );
     }
     private static function seed_first_edition() {
         global $wpdb;

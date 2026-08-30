@@ -17,6 +17,12 @@ use Mors\Domain\Chart_Engine;
  */
 class Admin {
 
+    /** Dozwolone MIME/rozmiary uploadu (Task 12 — hartowanie bezpieczeństwa). */
+    const COVER_MIMES     = [ 'image/jpeg', 'image/png', 'image/webp', 'image/gif' ];
+    const AUDIO_MIMES     = [ 'audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav' ];
+    const COVER_MAX_BYTES = 2 * MB_IN_BYTES;
+    const AUDIO_MAX_BYTES = 15 * MB_IN_BYTES;
+
     public function register() {
         $cap = [ $this, 'require_cap' ];
 
@@ -153,6 +159,19 @@ class Admin {
             'duration_seconds' => mors_parse_duration( $duration, 210 ),
         ];
 
+        if ( ! empty( $_FILES['cover'] ) ) {
+            $err = $this->validate_upload( 'cover', self::COVER_MIMES, self::COVER_MAX_BYTES );
+            if ( is_wp_error( $err ) ) {
+                return new \WP_REST_Response( [ 'success' => false, 'message' => $err->get_error_message() ], 400 );
+            }
+        }
+        if ( ! empty( $_FILES['audio'] ) ) {
+            $err = $this->validate_upload( 'audio', self::AUDIO_MIMES, self::AUDIO_MAX_BYTES );
+            if ( is_wp_error( $err ) ) {
+                return new \WP_REST_Response( [ 'success' => false, 'message' => $err->get_error_message() ], 400 );
+            }
+        }
+
         if ( ! empty( $_FILES['cover'] ) || ! empty( $_FILES['audio'] ) ) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
             require_once ABSPATH . 'wp-admin/includes/media.php';
@@ -205,6 +224,32 @@ class Admin {
         ] );
 
         return new \WP_REST_Response( [ 'success' => true, 'track' => $track ], 200 );
+    }
+
+    /**
+     * Waliduje wgrywany plik ($_FILES[$field]) zanim trafi do media_handle_upload():
+     * rozmiar w granicach $max_bytes oraz rzeczywisty MIME (sprawdzony przez
+     * wp_check_filetype_and_ext — nie ufamy samemu nagłówkowi $_FILES['type']
+     * przysłanemu przez klienta) na białej liście $allowed_mimes.
+     */
+    private function validate_upload( $field, array $allowed_mimes, $max_bytes ) {
+        if ( empty( $_FILES[ $field ]['tmp_name'] ) ) {
+            return true;
+        }
+        $file = $_FILES[ $field ];
+        if ( ! empty( $file['error'] ) && (int) $file['error'] !== UPLOAD_ERR_OK ) {
+            return new \WP_Error( 'mors_upload_error', 'Błąd przesyłania pliku.' );
+        }
+        if ( (int) $file['size'] > $max_bytes ) {
+            return new \WP_Error( 'mors_upload_too_large', 'Plik jest zbyt duży.' );
+        }
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        $filetype = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] );
+        $mime     = ! empty( $filetype['type'] ) ? $filetype['type'] : '';
+        if ( ! $mime || ! in_array( $mime, $allowed_mimes, true ) ) {
+            return new \WP_Error( 'mors_upload_bad_type', 'Niedozwolony typ pliku.' );
+        }
+        return true;
     }
 
     /** PUT /admin/tracks/{id} — częściowa aktualizacja (tylko obecne klucze). */
