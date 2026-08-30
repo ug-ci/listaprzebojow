@@ -124,4 +124,21 @@ class Test_Rest_Public extends WP_UnitTestCase {
         $this->assertSame( 200, $res->get_status() );
         $this->assertArrayHasKey( 'inCooldown', $res->get_data() );
     }
+
+    public function test_cast_then_cooldown_returns_429() {
+        // Przygotuj wpis w bieżącej edycji.
+        $ed = ( new \Mors\Db\Editions_Repo() )->current();
+        $tr = ( new \Mors\Db\Tracks_Repo() )->create( [ 'title' => 'T', 'artist' => 'A' ] );
+        $e  = ( new \Mors\Db\Entries_Repo() )->create( [ 'edition_id' => $ed['id'], 'track_id' => $tr['id'], 'position' => 1 ] );
+        $nonce = wp_create_nonce( 'wp_rest' );
+        $mk = function () use ( $e, $nonce ) {
+            $r = new WP_REST_Request( 'POST', '/mors/v1/votes/cast' );
+            $r->set_header( 'X-WP-Nonce', $nonce );
+            $r->set_header( 'Content-Type', 'application/json' );
+            $r->set_body( wp_json_encode( [ 'trackIds' => [ $e['id'] ] ] ) );
+            return rest_do_request( $r );
+        };
+        $this->assertSame( 200, $mk()->get_status() );
+        $this->assertSame( 429, $mk()->get_status() );
+    }
 }
