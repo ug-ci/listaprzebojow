@@ -48,6 +48,19 @@ class Admin {
             'permission_callback' => $cap,
             'callback'            => [ $this, 'reset_publish' ],
         ] );
+
+        $manage = [ $this, 'require_manage' ];
+
+        register_rest_route( 'mors/v1', '/admin/editors', [
+            [ 'methods' => 'GET', 'permission_callback' => $manage, 'callback' => [ $this, 'list_editors' ] ],
+            [ 'methods' => 'POST', 'permission_callback' => $manage, 'callback' => [ $this, 'add_editor' ] ],
+        ] );
+
+        register_rest_route( 'mors/v1', '/admin/editors/(?P<id>\d+)', [
+            'methods'             => 'DELETE',
+            'permission_callback' => $manage,
+            'callback'            => [ $this, 'remove_editor' ],
+        ] );
     }
 
     /** Wspólny permission_callback: nonce transportu + capability redakcyjna. */
@@ -254,5 +267,149 @@ class Admin {
         } catch ( \RuntimeException $e ) {
             return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );
         }
+    }
+
+    /**
+     * permission_callback dla /admin/editors/* — nonce transportu + capability
+     * mors_manage_editors (przyznana administratorom w Activatorze). Odrębna od
+     * require_cap(), bo zarządzanie redaktorami to wyższy poziom uprawnień niż
+     * zwykła edycja muzyki.
+     */
+    public function require_manage( $req ) {
+        $nonce = $req->get_header( 'x_wp_nonce' );
+        if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+            return new \WP_Error( 'mors_bad_nonce', 'Nieprawidłowy token żądania.', [ 'status' => 403 ] );
+        }
+        if ( ! current_user_can( \Mors_Enum::CAP_MANAGE ) ) {
+            return new \WP_Error( 'mors_forbidden', 'Brak uprawnień.', [ 'status' => 403 ] );
+        }
+        return true;
+    }
+
+    /**
+     * GET /admin/editors — użytkownicy WP z capability mors_edit_music LUB
+     * mors_present. "Redaktor" nie jest osobną tabelą — to zwykły WP_User
+     * z nadanymi capability (patrz add_editor()/remove_editor()).
+     */
+    public function list_editors( $req ) {
+        $editors = array_values( array_filter( get_users(), static function ( $u ) {
+            return user_can( $u, \Mors_Enum::CAP_EDIT_MUSIC ) || user_can( $u, \Mors_Enum::CAP_PRESENT );
+        } ) );
+
+        usort( $editors, static function ( $a, $b ) {
+            return strcmp( $a->user_registered, $b->user_registered );
+        } );
+
+        $out = array_map( function ( $u ) {
+            return $this->serialize_editor( $u );
+        }, $editors );
+
+        return new \WP_REST_Response( [ 'success' => true, 'editors' => $out ], 200 );
+    }
+
+    /**
+     * POST /admin/editors {fullName,email,role} — tworzy nowego użytkownika WP
+     * (rola bazowa 'subscriber') i nadaje mu capability wg roli redakcyjnej.
+     * Zwraca jednorazowe hasło tymczasowe (tempPassword) — nie jest nigdzie
+     * zapisywane w postaci jawnej poza tą jedną odpowiedzią.
+     */
+    public function add_editor( $req ) {
+        $params   = $req->get_params();
+        $fullName = isset( $params['fullName'] ) ? sanitize_text_field( $params['fullName'] ) : '';
+        $email    = isset( $params['email'] ) ? sanitize_email( $params['email'] ) : '';
+        $role     = isset( $params['role'] ) ? sanitize_text_field( $params['role'] ) : 'MUSIC_EDITOR';
+
+        if ( ! $fullName || ! $email ) {
+            return new \WP_REST_Response(
+                [ 'success' => false, 'message' => 'Wprowadź imię, nazwisko i adres e-mail redaktora.' ], 400 );
+        }
+
+        if ( get_user_by( 'email', $email ) ) {
+            return new \WP_REST_Response(
+                [ 'success' => false, 'message' => 'Redaktor z tym adresem e-mail już istnieje.' ], 409 );
+        }
+
+        $tempPassword = wp_generate_password( 16 );
+        $user_id      = wp_insert_user( [
+            'user_login'   => $this->derive_login( $email ),
+            'user_email'   => $email,
+            'display_name' => $fullName,
+            'user_pass'    => $tempPassword,
+            'role'         => 'subscriber',
+        ] );
+
+        if ( is_wp_error( $user_id ) ) {
+            return new \WP_REST_Response(
+                [ 'success' => false, 'message' => 'Nie udało się utworzyć redaktora.' ], 500 );
+        }
+
+        $user = get_user_by( 'id', $user_id );
+
+        // SUPER_ADMIN nie jest tworzony przez ten endpoint — nieznana rola traktowana jak MUSIC_EDITOR.
+        if ( $role === 'PRESENTER' ) {
+            $user->add_cap( \Mors_Enum::CAP_PRESENT );
+        } else {
+            $role = 'MUSIC_EDITOR';
+            $user->add_cap( \Mors_Enum::CAP_EDIT_MUSIC );
+            $user->add_cap( \Mors_Enum::CAP_PRESENT );
+        }
+
+        ( new Votes_Repo() )->log( get_current_user_id(), 'EDITOR_CREATE', [
+            'userId' => $user->ID, 'email' => $email,
+        ] );
+
+        return new \WP_REST_Response( [
+            'success'      => true,
+            'editor'       => $this->serialize_editor( $user, $role ),
+            'tempPassword' => $tempPassword,
+        ], 200 );
+    }
+
+    /**
+     * DELETE /admin/editors/{id} — odbiera capability redakcyjne. Konto WP
+     * pozostaje (nie usuwamy użytkownika), zgodnie z kontraktem zadania.
+     */
+    public function remove_editor( $req ) {
+        $user = get_user_by( 'id', (int) $req['id'] );
+        if ( ! $user ) {
+            return new \WP_REST_Response( [ 'success' => false, 'message' => 'Nie znaleziono użytkownika.' ], 404 );
+        }
+
+        $user->remove_cap( \Mors_Enum::CAP_EDIT_MUSIC );
+        $user->remove_cap( \Mors_Enum::CAP_PRESENT );
+
+        ( new Votes_Repo() )->log( get_current_user_id(), 'EDITOR_REMOVE', [ 'userId' => $user->ID ] );
+
+        return new \WP_REST_Response( [ 'success' => true ], 200 );
+    }
+
+    /** Kształt {id,email,fullName,role,isActive,createdAt} współdzielony przez GET/POST. */
+    private function serialize_editor( \WP_User $u, $role = null ) {
+        if ( $role === null ) {
+            $role = user_can( $u, \Mors_Enum::CAP_EDIT_MUSIC ) ? 'MUSIC_EDITOR' : 'PRESENTER';
+        }
+        return [
+            'id'        => $u->ID,
+            'email'     => $u->user_email,
+            'fullName'  => $u->display_name,
+            'role'      => $role,
+            'isActive'  => true,
+            'createdAt' => $u->user_registered,
+        ];
+    }
+
+    /** Wyprowadza unikalny user_login z lokalnej części adresu e-mail. */
+    private function derive_login( $email ) {
+        $base = sanitize_user( current( explode( '@', $email ) ), true );
+        if ( ! $base ) {
+            $base = 'redaktor';
+        }
+        $login = $base;
+        $i     = 1;
+        while ( username_exists( $login ) ) {
+            $login = $base . $i;
+            $i++;
+        }
+        return $login;
     }
 }
