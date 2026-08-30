@@ -5,6 +5,7 @@ use Mors\Db\Editions_Repo;
 use Mors\Db\Entries_Repo;
 use Mors\Db\Tracks_Repo;
 use Mors\Db\Votes_Repo;
+use Mors\Domain\Chart_Engine;
 
 /**
  * Admin REST: lista/upload/edycja/usuwanie utworów panelu redakcji.
@@ -34,6 +35,18 @@ class Admin {
         register_rest_route( 'mors/v1', '/admin/tracks/(?P<id>[a-f0-9-]+)', [
             [ 'methods' => 'PUT',    'permission_callback' => $cap, 'callback' => [ $this, 'update_track' ] ],
             [ 'methods' => 'DELETE', 'permission_callback' => $cap, 'callback' => [ $this, 'delete_track' ] ],
+        ] );
+
+        register_rest_route( 'mors/v1', '/admin/chart/freeze', [
+            'methods'             => 'POST',
+            'permission_callback' => $cap,
+            'callback'            => [ $this, 'freeze' ],
+        ] );
+
+        register_rest_route( 'mors/v1', '/admin/chart/reset-and-publish', [
+            'methods'             => 'POST',
+            'permission_callback' => $cap,
+            'callback'            => [ $this, 'reset_publish' ],
         ] );
     }
 
@@ -221,5 +234,25 @@ class Admin {
         ( new Votes_Repo() )->log( get_current_user_id(), 'TRACK_DELETE', [ 'trackId' => $id ] );
 
         return new \WP_REST_Response( [ 'success' => true ], 200 );
+    }
+
+    /** POST /admin/chart/freeze — zamraża bieżące notowanie (status -> FROZEN). */
+    public function freeze( $req ) {
+        try {
+            $out = ( new Chart_Engine() )->freeze( get_current_user_id() );
+            return new \WP_REST_Response( $out, 200 );
+        } catch ( \RuntimeException $e ) {
+            return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );
+        }
+    }
+
+    /** POST /admin/chart/reset-and-publish — reset + publikacja nowego wydania. */
+    public function reset_publish( $req ) {
+        try {
+            $out = ( new Chart_Engine() )->reset_and_publish( get_current_user_id() );
+            return new \WP_REST_Response( $out, 200 );
+        } catch ( \RuntimeException $e ) {
+            return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );
+        }
     }
 }

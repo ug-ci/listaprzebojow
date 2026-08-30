@@ -147,4 +147,49 @@ class Test_Rest_Admin extends Mors_TestCase {
         ] );
         $this->assertSame( 404, $res->get_status() );
     }
+
+    public function test_editor_can_freeze() {
+        $uid = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $uid );
+        $res = $this->req( 'POST', '/mors/v1/admin/chart/freeze' );
+        $this->assertSame( 200, $res->get_status() );
+        $this->assertTrue( $res->get_data()['success'] );
+        $this->assertSame( 'FROZEN', ( new \Mors\Db\Editions_Repo() )->current()['status'] );
+    }
+
+    public function test_freeze_requires_capability() {
+        $uid = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+        wp_set_current_user( $uid );
+        $this->assertSame( 403, $this->req( 'POST', '/mors/v1/admin/chart/freeze' )->get_status() );
+    }
+
+    public function test_freeze_without_active_edition_returns_409() {
+        global $wpdb;
+        $t = \Mors\Db\Schema::table_names();
+        $wpdb->update( $t['editions'], [ 'is_current' => 0 ], [ 'is_current' => 1 ] );
+
+        $uid = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $uid );
+        $res = $this->req( 'POST', '/mors/v1/admin/chart/freeze' );
+        $this->assertSame( 409, $res->get_status() );
+        $this->assertFalse( $res->get_data()['success'] );
+    }
+
+    public function test_reset_and_publish_via_rest() {
+        $uid = self::factory()->user->create( [ 'role' => 'administrator' ] );
+        wp_set_current_user( $uid );
+
+        $edition = ( new \Mors\Db\Editions_Repo() )->current();
+        $res = $this->req( 'POST', '/mors/v1/admin/chart/reset-and-publish' );
+        $this->assertSame( 200, $res->get_status() );
+        $data = $res->get_data();
+        $this->assertTrue( $data['success'] );
+        $this->assertSame( (int) $edition['edition_number'] + 1, (int) $data['edition']['editionNumber'] );
+        $this->assertSame( 'ACTIVE', $data['edition']['status'] );
+
+        $newEdition = ( new \Mors\Db\Editions_Repo() )->current();
+        $waiting = ( new \Mors\Db\Entries_Repo() )->for_edition( $newEdition['id'], true );
+        // Notowanie startuje bez wpisów listy, poczekalnia dopełniona placeholderami do 25.
+        $this->assertSame( 25, count( $waiting ) );
+    }
 }
