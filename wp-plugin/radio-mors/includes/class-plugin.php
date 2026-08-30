@@ -15,5 +15,6 @@ class Plugin {
     public function register_rest_routes() {
         ( new \Mors\Rest\Chart() )->register();
         ( new \Mors\Rest\Votes() )->register();
+        ( new \Mors\Rest\Admin() )->register();
     }
 }
