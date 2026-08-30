@@ -94,21 +94,4 @@ class Test_Serializer extends WP_UnitTestCase {
         $this->assertFalse( $out['isChart'] );
         $this->assertArrayNotHasKey( 'position', $out );
     }
-
-    public function test_edition_envelope() {
-        $edition = [
-            'id' => 'ed1', 'edition_number' => 42, 'title' => 'Edycja 42',
-            'status' => 'ACTIVE', 'voting_ends_at' => '2026-09-01 12:00:00',
-        ];
-        $out = \Mors\Domain\Serializer::edition( $edition, [ $this->chart_row() ], [ $this->waiting_row() ] );
-
-        $this->assertSame( 'ed1', $out['edition']['id'] );
-        $this->assertSame( 42, $out['edition']['editionNumber'] );
-        $this->assertCount( 1, $out['chart'] );
-        $this->assertCount( 1, $out['waitingRoom'] );
-        $this->assertSame( 'e1', $out['chart'][0]['id'] );
-        $this->assertSame( 'e2', $out['waitingRoom'][0]['id'] );
-        $this->assertTrue( $out['chart'][0]['isChart'] );
-        $this->assertFalse( $out['waitingRoom'][0]['isChart'] );
-    }
 }

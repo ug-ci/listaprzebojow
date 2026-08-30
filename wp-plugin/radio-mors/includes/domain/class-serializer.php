@@ -77,27 +77,4 @@ class Serializer {
             'isChart'        => false,
         ];
     }
-
-    /**
-     * Koperta edycji dla SPA: podstawowe pola edycji + listy chart/waitingRoom.
-     * Dokładny kształt pola "edition" zostanie dopracowany razem z warstwą REST
-     * (kolejne zadanie); na razie zawiera pola potrzebne do nagłówka SPA.
-     *
-     * @param array $edition     Rekord z Editions_Repo (current()/create()).
-     * @param array $chartRows   Wiersze z Entries_Repo::for_edition( $id, false ).
-     * @param array $waitingRows Wiersze z Entries_Repo::for_edition( $id, true ).
-     */
-    public static function edition( array $edition, array $chartRows, array $waitingRows ) {
-        return [
-            'edition' => [
-                'id'            => $edition['id'],
-                'editionNumber' => isset( $edition['edition_number'] ) ? (int) $edition['edition_number'] : null,
-                'title'         => isset( $edition['title'] ) ? $edition['title'] : null,
-                'status'        => isset( $edition['status'] ) ? $edition['status'] : null,
-                'votingEndsAt'  => isset( $edition['voting_ends_at'] ) ? $edition['voting_ends_at'] : null,
-            ],
-            'chart'       => array_map( [ self::class, 'chart_entry' ], $chartRows ),
-            'waitingRoom' => array_map( [ self::class, 'waiting_entry' ], $waitingRows ),
-        ];
-    }
 }
