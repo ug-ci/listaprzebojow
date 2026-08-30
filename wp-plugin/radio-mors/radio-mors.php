@@ -17,4 +17,7 @@ require_once MORS_PLUGIN_DIR . 'includes/constants.php';
 $mors_autoload = MORS_PLUGIN_DIR . 'vendor/autoload.php';
 if ( file_exists( $mors_autoload ) ) { require_once $mors_autoload; }
 
+register_activation_hook( __FILE__, [ '\\Mors\\Activator', 'activate' ] );
+register_deactivation_hook( __FILE__, [ '\\Mors\\Deactivator', 'deactivate' ] );
+
 \Mors\Plugin::instance()->boot();
