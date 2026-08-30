@@ -33,9 +33,12 @@ class Tracks_Repo extends Repo {
     }
     public function delete( $id ) {
         $db = $this->wpdb(); $t = $this->t();
-        // Kaskada logiczna: usuń wpisy i głosy tego utworu.
-        $db->delete( $t['entries'], [ 'track_id' => $id ] );
-        $db->delete( $t['votes'], [ 'track_id' => $id ] );
-        $db->delete( $t['tracks'], [ 'id' => $id ] );
+        // Kaskada logiczna: usuń wpisy i głosy tego utworu w jednej transakcji,
+        // żeby awaria w połowie sekwencji nie zostawiła osieroconych wierszy.
+        $this->tx( function () use ( $db, $t, $id ) {
+            $db->delete( $t['entries'], [ 'track_id' => $id ] );
+            $db->delete( $t['votes'], [ 'track_id' => $id ] );
+            $db->delete( $t['tracks'], [ 'id' => $id ] );
+        } );
     }
 }
