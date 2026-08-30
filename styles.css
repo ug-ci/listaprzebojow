@@ -1,0 +1,706 @@
+/* ==========================================================================
+   UG DESIGN SYSTEM — UNIWERSYTET GDAŃSKI
+   Oficjalny system wzornictwa wizualnego dla produktów cyfrowych UG
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap');
+
+:root {
+  /* --- 01. PALETA KOLORYSTYCZNA (COLORS) --- */
+  /* Primary Palette */
+  --ug-blue: #0041d2;
+  --ug-blue-hover: #032c73;
+  --ug-blue-dark: #032c73;
+  --ug-navy: #00214d;
+  
+  /* Tints */
+  --ug-sail: #a1daf8;
+  --ug-foam: #e5f5fd;
+  --ug-white: #ffffff;
+  
+  /* Neutrals */
+  --ug-gray-100: #F5F5F5;
+  --ug-gray-200: #D9D9D9;
+  --ug-gray-300: #E5E7EB;
+  --ug-gray-400: #647391;
+  --ug-gray-500: #6B6B6B;
+  --ug-gray-800: #1E293B;
+  --ug-gray-900: #0F172A;
+  
+  /* Semantic Colors */
+  --ug-error: #EF305E;
+  --ug-success: #1BA345;
+  --ug-warning: #FEC001;
+  --ug-info: #02A2B9;
+
+  /* --- 02. TYPOGRAFIA (TYPOGRAPHY) --- */
+  --font-headings: 'Work Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+
+  /* --- 03. SPACING & RADIUS & SHADOWS --- */
+  --sp-4: 4px;
+  --sp-8: 8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-20: 20px;
+  --sp-24: 24px;
+  --sp-32: 32px;
+  --sp-48: 48px;
+  --sp-64: 64px;
+
+  /* Zero border-radius for entire UI */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-full: 0px;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 14px rgba(3, 44, 115, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 25px rgba(3, 44, 115, 0.12), 0 4px 10px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 20px 40px rgba(0, 33, 77, 0.15);
+}
+
+/* ================= BASE STYLES ================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0px !important;
+}
+
+body {
+  background-color: var(--ug-gray-100);
+  color: var(--ug-gray-800);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Headings (Work Sans 600) */
+h1, .ug-h1 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 34px;
+  line-height: 1.25;
+  color: var(--ug-blue-dark);
+}
+
+h2, .ug-h2 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.3;
+  color: var(--ug-blue-dark);
+}
+
+h3, .ug-h3 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.35;
+  color: var(--ug-blue-dark);
+}
+
+h4, .ug-h4 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--ug-blue-dark);
+}
+
+h5, .ug-h5 {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ug-blue-dark);
+}
+
+/* Body typography */
+.ug-lead {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ug-gray-800);
+}
+
+.ug-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ug-gray-800);
+}
+
+.ug-label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ug-blue-dark);
+}
+
+.ug-small, .ug-meta {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ug-gray-400);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ug-gray-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ug-gray-400);
+  border-radius: 0px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ug-blue-dark);
+}
+
+/* ================= 04. BUTTONS & ACTIONS ================= */
+.btn-ug-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  background-color: var(--ug-blue);
+  color: var(--ug-white) !important;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 0px !important;
+  border: 1px solid var(--ug-blue);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+
+.btn-ug-primary:hover {
+  background-color: var(--ug-blue-dark);
+  border-color: var(--ug-blue-dark);
+  color: var(--ug-white) !important;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-ug-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-ug-primary.disabled,
+.btn-ug-primary:disabled {
+  background-color: var(--ug-gray-200);
+  border-color: var(--ug-gray-200);
+  color: var(--ug-gray-500) !important;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-ug-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.btn-ug-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  background-color: var(--ug-white);
+  color: var(--ug-blue) !important;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 0px !important;
+  border: 1.5px solid var(--ug-blue);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-ug-outlined:hover {
+  background-color: var(--ug-foam);
+  color: var(--ug-blue-dark) !important;
+  border-color: var(--ug-blue-dark);
+}
+
+.btn-ug-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  background-color: var(--ug-blue-dark);
+  color: var(--ug-white) !important;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 0px !important;
+  border: 1px solid var(--ug-blue-dark);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-ug-dark:hover {
+  background-color: var(--ug-navy);
+  border-color: var(--ug-navy);
+  color: var(--ug-white) !important;
+}
+
+.btn-ug-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  background-color: transparent;
+  color: var(--ug-white) !important;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 0px !important;
+  border: 1.5px solid var(--ug-white);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.btn-ug-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--ug-white) !important;
+}
+
+.btn-ug-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+  border-radius: 0px !important;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-ug-chevron:hover {
+  background-color: var(--ug-blue-dark);
+}
+
+.link-ug-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  color: var(--ug-blue);
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.link-ug-arrow:hover {
+  color: var(--ug-blue-dark);
+  gap: 12px;
+}
+
+.link-ug-arrow svg, .link-ug-arrow i {
+  transition: transform 0.2s ease;
+}
+
+.link-ug-arrow:hover svg, .link-ug-arrow:hover i {
+  transform: translateX(4px);
+}
+
+.banner-ug-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--ug-blue-dark);
+  color: var(--ug-white);
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 24px;
+  border-radius: 0px !important;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.banner-ug-more:hover {
+  background-color: var(--ug-navy);
+}
+
+/* ================= 05. FORMS & INPUTS ================= */
+.ug-form-group {
+  margin-bottom: var(--sp-16);
+}
+
+.ug-form-label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ug-blue-dark);
+  margin-bottom: var(--sp-8);
+}
+
+.ug-input {
+  width: 100%;
+  padding: 11px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ug-gray-800);
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ug-input::placeholder {
+  color: var(--ug-gray-500);
+}
+
+.ug-input:focus {
+  border-color: var(--ug-blue);
+  box-shadow: 0 0 0 3px rgba(0, 65, 210, 0.12);
+}
+
+.ug-input:disabled {
+  background-color: var(--ug-gray-100);
+  border-color: var(--ug-gray-200);
+  color: var(--ug-gray-500);
+  cursor: not-allowed;
+}
+
+.ug-input.error {
+  border-color: var(--ug-error) !important;
+}
+
+.ug-error-message {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--ug-error);
+  margin-top: var(--sp-4);
+}
+
+.ug-select {
+  width: 100%;
+  padding: 11px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ug-gray-800);
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23032c73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.ug-select:focus {
+  border-color: var(--ug-blue);
+  box-shadow: 0 0 0 3px rgba(0, 65, 210, 0.12);
+}
+
+/* Search Bar Component (Page 7) */
+.ug-search-bar {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.ug-search-bar input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--ug-gray-200);
+  border-right: none;
+  border-radius: 0px !important;
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  background-color: var(--ug-white);
+}
+
+.ug-search-bar input:focus {
+  border-color: var(--ug-blue);
+}
+
+.ug-search-bar button {
+  padding: 10px 18px;
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+  border: 1px solid var(--ug-blue);
+  border-radius: 0px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.ug-search-bar button:hover {
+  background-color: var(--ug-blue-dark);
+}
+
+/* ================= 06. TAGS & PILLS ================= */
+.ug-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 4px 10px;
+  border-radius: 0px !important;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ug-tag-blue {
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+}
+
+.ug-tag-navy {
+  background-color: var(--ug-navy);
+  color: var(--ug-white);
+}
+
+.ug-tag-outline {
+  background-color: var(--ug-white);
+  color: var(--ug-blue);
+  border: 1px solid var(--ug-blue);
+}
+
+.ug-tag-sail {
+  background-color: var(--ug-sail);
+  color: var(--ug-navy);
+}
+
+.ug-tag-foam {
+  background-color: var(--ug-foam);
+  color: var(--ug-blue-dark);
+  border: 1px solid rgba(0, 65, 210, 0.2);
+}
+
+/* Trend Badges */
+.trend-tag-up {
+  background-color: rgba(27, 163, 69, 0.12);
+  color: var(--ug-success);
+  border: 1px solid rgba(27, 163, 69, 0.3);
+}
+
+.trend-tag-down {
+  background-color: rgba(239, 48, 94, 0.12);
+  color: var(--ug-error);
+  border: 1px solid rgba(239, 48, 94, 0.3);
+}
+
+.trend-tag-new {
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+}
+
+.trend-tag-same {
+  background-color: var(--ug-gray-200);
+  color: var(--ug-gray-500);
+}
+
+/* ================= 07. CARDS & SURFACES ================= */
+.ug-card {
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.ug-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0, 65, 210, 0.35);
+}
+
+.ug-card-selected {
+  border: 2px solid var(--ug-blue) !important;
+  background-color: var(--ug-foam) !important;
+}
+
+/* Featured Card (Page 12) */
+.ug-featured-card {
+  position: relative;
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.ug-featured-banner {
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+  padding: 16px 24px;
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Info Box (Page 13) */
+.ug-info-box {
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+
+/* ================= 08. NAVIGATION & MENU ================= */
+.ug-top-navbar {
+  background-color: var(--ug-navy);
+  color: var(--ug-white);
+}
+
+.ug-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background-color: var(--ug-white);
+  color: var(--ug-blue-dark);
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1px solid var(--ug-gray-100);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.ug-menu-item:hover {
+  background-color: var(--ug-foam);
+  color: var(--ug-blue);
+}
+
+.ug-menu-item.active {
+  background-color: var(--ug-blue);
+  color: var(--ug-white);
+}
+
+/* Sidebar navigation */
+.ug-sidebar-nav {
+  background-color: var(--ug-white);
+  border: 1px solid var(--ug-gray-200);
+  border-radius: 0px !important;
+  overflow: hidden;
+}
+
+.ug-sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--ug-gray-200);
+}
+
+.ug-sidebar-subgroup {
+  background-color: var(--ug-gray-100);
+  padding: 8px 16px 8px 24px;
+}
+
+/* ================= 09. FOOTER ================= */
+.ug-main-footer {
+  background-color: var(--ug-blue-dark);
+  color: var(--ug-white);
+  padding: 48px 0 36px 0;
+}
+
+.ug-footer-bottom {
+  background-color: var(--ug-navy);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 16px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ================= AUDIO WAVEFORM & ANIMATIONS ================= */
+.ug-waveform-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+}
+
+.ug-waveform-bar {
+  width: 3px;
+  border-radius: 0px !important;
+  background-color: var(--ug-gray-200);
+  transition: height 0.15s ease, background-color 0.2s ease;
+}
+
+.ug-waveform-bar.active {
+  background-color: var(--ug-blue);
+}
+
+.ug-waveform-bar.playing {
+  background-color: var(--ug-blue);
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.ug-pulse-dot {
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+/* Modal backdrop */
+.ug-modal-backdrop {
+  background: rgba(0, 33, 77, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Equalizer Bars Animation */
+@keyframes ug-eq-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+.ug-eq-1 { animation: ug-eq-bar 0.8s ease-in-out infinite 0.1s; }
+.ug-eq-2 { animation: ug-eq-bar 0.6s ease-in-out infinite 0.3s; }
+.ug-eq-3 { animation: ug-eq-bar 0.9s ease-in-out infinite 0.2s; }
+.ug-eq-4 { animation: ug-eq-bar 0.7s ease-in-out infinite 0.4s; }

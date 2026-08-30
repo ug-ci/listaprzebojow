@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista Przebojów Radia MORS • Uniwersytet Gdański</title>
+
+  <!-- Google Fonts: Work Sans (Headings) & DM Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Compiled Tailwind + UG Design System (ahead-of-time build, see tailwind.config.js) -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#F5F5F5] text-[#1E293B] min-h-screen flex flex-col selection:bg-[#a1daf8] selection:text-[#00214d]">
+
+  <!-- ================= 08. TOP NAVIGATION BAR (PAGE 14) ================= -->
+  <div class="ug-top-navbar border-b border-[#001736]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+
+      <!-- UG Emblem & Brand Logo -->
+      <div class="flex items-center gap-3.5 cursor-pointer" onclick="app.switchTab('chart')">
+        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white/10 p-1 border border-white/20">
+          <svg viewBox="0 0 100 100" class="w-8 h-8 fill-white" aria-label="Herb Uniwersytetu Gdańskiego">
+            <path d="M50 5 C30 5 15 15 15 35 C15 65 50 95 50 95 C50 95 85 65 85 35 C85 15 70 5 50 5 Z" fill="none" stroke="white" stroke-width="6"/>
+            <path d="M35 32 L40 44 L50 34 L60 44 L65 32 L68 50 L32 50 Z" fill="white"/>
+            <path d="M47 54 H53 V60 H59 V66 H53 V72 H47 V66 H41 V60 H47 Z" fill="white"/>
+            <path d="M47 74 H53 V78 H57 V82 H53 V86 H47 V82 H43 V78 H47 Z" fill="white"/>
+          </svg>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-headings font-bold text-lg sm:text-xl tracking-tight text-white uppercase">Uniwersytet Gdański</span>
+            <span class="hidden sm:inline-block w-1.5 h-1.5 bg-[#a1daf8]"></span>
+            <span class="hidden sm:inline font-headings font-semibold text-sm text-[#a1daf8] tracking-wider">RADIO MORS</span>
+          </div>
+          <p class="text-[11px] text-slate-300 font-body">Mega Otwarte Radio Studenckie • 98.4 FM & Online</p>
+        </div>
+      </div>
+
+      <!-- Header actions -->
+      <div class="flex items-center gap-3 text-xs">
+        <div id="header-admin-auth-widget" class="flex items-center"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= TOP ON-AIR NOTIFICATION BAR ================= -->
+  <aside aria-label="Informacja o audycji" class="bg-[#032c73] text-white border-b border-[#0041d2]/40 py-2 px-4 text-xs font-body">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-2.5 w-2.5 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full bg-[#EF305E] opacity-75"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 bg-[#EF305E]"></span>
+        </span>
+        <span class="font-headings font-bold text-white uppercase tracking-wider text-[11px] bg-[#EF305E] px-2 py-0.5">ON-AIR</span>
+        <span class="text-[#a1daf8] hidden sm:inline">•</span>
+        <span class="text-slate-200 hidden sm:inline">Audycja podsumowująca: <strong class="text-white font-semibold">w każdy Piątek o 18:00 na antenie Radia MORS</strong></span>
+      </div>
+
+      <div class="flex items-center gap-4 text-slate-200">
+        <div id="live-pulse-badge" class="flex items-center gap-1.5 transition-transform duration-300">
+          <i data-lucide="radio" class="w-3.5 h-3.5 text-[#a1daf8]"></i>
+          <span>Głosów łącznie: <strong id="header-total-votes" class="text-white font-mono font-bold">0</strong></span>
+        </div>
+        <span class="hidden md:inline text-slate-400">•</span>
+        <div class="hidden md:flex items-center gap-1.5 text-slate-200">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-[#FEC001]"></i>
+          <span>Koniec głosowania: <strong id="header-countdown" class="text-[#FEC001] font-mono font-bold">--</strong></span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN HEADER & SUB-NAVIGATION ================= -->
+  <header class="bg-white border-b border-[#D9D9D9] sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-[#0041d2] flex items-center justify-center text-white shadow-sm p-2 flex-shrink-0">
+          <div class="flex items-end gap-0.5 h-4">
+            <div class="w-1 bg-white ug-eq-1"></div>
+            <div class="w-1 bg-white ug-eq-2"></div>
+            <div class="w-1 bg-white ug-eq-3"></div>
+            <div class="w-1 bg-white ug-eq-4"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="ug-h4 !text-xl !font-bold !text-[#032c73]">Lista Przebojów Radia MORS</h1>
+            <span id="header-edition-num" class="ug-tag ug-tag-sail text-[11px] font-bold">#--</span>
+          </div>
+          <p class="ug-small !text-xs !text-[#647391]">OFICJALNE NOTOWANIE MUZYCZNE UNIWERSYTETU GDAŃSKIEGO</p>
+        </div>
+      </div>
+
+      <nav class="flex flex-wrap items-center gap-1.5" aria-label="Główna nawigacja">
+        <button data-tab="chart" class="nav-tab-btn px-4 py-2 text-xs sm:text-sm font-headings font-semibold transition-all flex items-center gap-2 bg-[#0041d2] text-white shadow-sm border border-[#0041d2]">
+          <i data-lucide="list-ordered" class="w-4 h-4"></i>
+          <span>Notowanie (TOP 20)</span>
+        </button>
+        <button data-tab="waiting" class="nav-tab-btn px-4 py-2 text-xs sm:text-sm font-headings font-semibold text-[#032c73] hover:bg-[#e5f5fd] hover:text-[#0041d2] border border-transparent transition-all flex items-center gap-2">
+          <i data-lucide="inbox" class="w-4 h-4"></i>
+          <span>Poczekalnia <span id="waiting-count-badge" class="hidden sm:inline">(25)</span></span>
+        </button>
+        <button data-tab="admin" class="nav-tab-btn px-3 sm:px-4 py-2 text-xs sm:text-sm font-headings font-semibold text-[#032c73] hover:bg-[#e5f5fd] hover:text-[#0041d2] border border-transparent transition-all flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-[#0041d2]"></i>
+          <span>Panel Redaktora</span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ================= 24H COOLDOWN STATUS BANNER ================= -->
+  <section id="voter-lock-banner" aria-label="Status blokady 24h" class="hidden bg-[#FFFBEB] border-b border-[#FEC001] py-3.5 px-4 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-[#FEC001]/20 text-[#B45309] border border-[#FEC001]/40">
+          <i data-lucide="lock" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-headings font-bold text-[#92400E]">Głosowałeś w ciągu ostatnich 24 godzin!</span>
+          <p class="text-[#78350F] text-xs">Zgodnie z regulaminem radia możesz oddać 3 głosy raz na dobę. Kolejny głos za: <strong id="cooldown-timer-text" class="font-mono font-bold text-[#92400E]">--:--:--</strong></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="app.openSocialShareModal()" class="btn-ug-outlined btn-ug-sm !py-1.5 !px-3 !text-xs">
+          <i data-lucide="image" class="w-3.5 h-3.5"></i> Karta głosu
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAIN CONTENT VIEWS ================= -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
+
+    <!-- ================= VIEW 1: GŁÓWNE NOTOWANIE (TOP 20) ================= -->
+    <section id="view-chart" class="space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-white border border-[#D9D9D9] shadow-sm">
+        <div>
+          <h2 class="ug-h2 !text-2xl !font-bold !text-[#032c73] flex items-center gap-2">
+            Główne Notowanie <span class="text-[#0041d2]">TOP 20</span>
+          </h2>
+          <p class="ug-body !text-sm !text-[#647391] mt-1">
+            Wybierz <strong>do 3 swoich faworytów</strong> (z notowania lub poczekalni). Głosowanie odnawia się co 24 godziny.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-[#e5f5fd] border border-[#0041d2]/20 text-xs text-[#032c73]">
+            <i data-lucide="shield-check" class="w-4 h-4 text-[#1BA345]"></i>
+            <span>Weryfikacja: <strong>Cloudflare Turnstile</strong></span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-[#e5f5fd] border border-[#0041d2]/20 text-xs text-[#032c73]">
+            <i data-lucide="vote" class="w-4 h-4 text-[#0041d2]"></i>
+            <span>Zasada: <strong>3 głosy / 24h</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="chart-tracks-container"></div>
+    </section>
+
+    <!-- ================= VIEW 2: POCZEKALNIA ================= -->
+    <section id="view-waiting" class="hidden space-y-6">
+      <div class="p-6 md:p-8 bg-[#032c73] text-white border border-[#0041d2] shadow-md">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#0041d2] text-white text-xs font-headings font-semibold uppercase tracking-wider mb-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#a1daf8]"></i> Poczekalnia do Listy Przebojów
+            </div>
+            <h2 class="ug-h2 !text-white !text-2xl md:!text-3xl mt-1">25 Nowych Propozycji</h2>
+            <p class="text-slate-200 text-sm mt-1.5 max-w-2xl font-body">
+              Utwory zgłoszone przez słuchaczy oraz redakcję muzyczną Radia MORS Uniwersytetu Gdańskiego. Dwa utwory z największą liczbą głosów awansują bezpośrednio do Notowania Głównego w najbliższy piątek!
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-center p-4 bg-[#00214d] border border-white/10 min-w-[120px]">
+              <div id="waiting-total-count" class="text-3xl font-headings font-bold text-[#a1daf8]">25</div>
+              <div class="text-[11px] text-slate-300 uppercase font-headings font-semibold mt-0.5">Utworów w puli</div>
+            </div>
+            <div class="text-center p-4 bg-[#00214d] border border-white/10 min-w-[120px]">
+              <div class="text-3xl font-headings font-bold text-white">TOP 2</div>
+              <div class="text-[11px] text-slate-300 uppercase font-headings font-semibold mt-0.5">Awans do TOP20</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="waiting-tracks-container"></div>
+    </section>
+
+    <!-- ================= VIEW 3: PANEL ADMINISTRATORA (CMS) ================= -->
+    <section id="view-admin" class="hidden space-y-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-white border border-[#D9D9D9] shadow-sm">
+        <div class="flex items-center gap-3.5">
+          <div class="p-3 bg-[#e5f5fd] text-[#0041d2] border border-[#0041d2]/30">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="ug-h3 !text-xl !font-bold !text-[#032c73]">Panel Redaktora / Administratora</h2>
+            <p class="ug-small !text-xs !text-[#647391]">Zarządzanie bazą utworów, uploadem próbek audio oraz procedurą zamknięcia notowania.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="app.openResetChartModal()" class="btn-ug-primary !bg-[#EF305E] !border-[#EF305E] hover:!bg-[#d9224e] !text-white text-xs sm:text-sm">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Zamknij i zresetuj notowanie</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 p-6 ug-card space-y-5">
+          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
+            <i data-lucide="upload-cloud" class="w-5 h-5 text-[#0041d2]"></i>
+            <span>Dodaj nowy utwór (.WAV / .MP3)</span>
+          </h3>
+
+          <div id="admin-audio-dropzone" class="border-2 border-dashed border-[#D9D9D9] hover:border-[#0041d2] p-6 text-center cursor-pointer transition-all bg-[#F5F5F5] group">
+            <input type="file" id="admin-file-input" accept=".wav,.mp3,audio/wav,audio/mpeg" class="hidden" />
+            <div class="w-12 h-12 bg-[#e5f5fd] text-[#0041d2] flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform">
+              <i data-lucide="music" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm font-headings font-semibold text-[#032c73]">Przeciągnij plik audio lub <span class="text-[#0041d2] underline">wybierz z dysku</span></p>
+            <p class="ug-small !text-xs !text-[#647391] mt-1">Obsługiwane formaty: <strong>.WAV</strong> (bezstratny) lub <strong>.MP3</strong> (min. 320 kbps). Max 50 MB.</p>
+          </div>
+
+          <div id="admin-upload-status" class="hidden p-4 bg-[#e5f5fd] border border-[#0041d2]/30 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-[#0041d2] font-semibold flex items-center gap-1.5">
+                <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Przetwarzanie audio (EBU R128 & Waveform peak extraction)...
+              </span>
+              <span class="text-[#032c73] font-mono font-bold">100%</span>
+            </div>
+            <div class="w-full h-2 bg-[#D9D9D9] overflow-hidden">
+              <div id="admin-upload-progress" class="h-full bg-[#0041d2] w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="ug-form-group">
+              <label class="ug-form-label">Tytuł utworu</label>
+              <input type="text" id="admin-input-title" placeholder="np. Bałtycki Sztorm" class="ug-input" />
+            </div>
+            <div class="ug-form-group">
+              <label class="ug-form-label">Wykonawca / Zespół</label>
+              <input type="text" id="admin-input-artist" placeholder="np. Neon Wave" class="ug-input" />
+            </div>
+            <div class="ug-form-group">
+              <label class="ug-form-label">Docelowa sekcja</label>
+              <select id="admin-input-target" class="ug-select">
+                <option value="waiting">Poczekalnia (Uzupełnij do 25 utworów)</option>
+                <option value="chart">Notowanie Główne (TOP 20)</option>
+              </select>
+            </div>
+            <div class="ug-form-group">
+              <label class="ug-form-label">Czas trwania (min:sek)</label>
+              <input type="text" id="admin-input-duration" value="3:30" class="ug-input" />
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#F5F5F5] border border-[#D9D9D9] space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="ug-form-label !mb-0 flex items-center gap-1.5">
+                <i data-lucide="image" class="w-4 h-4 text-[#0041d2]"></i>
+                <span>Okładka utworu / singla (.JPG, .PNG, .WEBP)</span>
+              </label>
+              <span class="ug-small !text-[11px]">Format 1:1, Max 10 MB</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <div class="relative w-24 h-24 bg-[#00214d] flex items-center justify-center text-white border border-[#D9D9D9] flex-shrink-0 overflow-hidden shadow-sm">
+                <img id="admin-cover-preview-img" src="" alt="Podgląd okładki" class="hidden w-full h-full object-cover" />
+                <div id="admin-cover-placeholder" class="text-center p-2">
+                  <i data-lucide="disc" class="w-6 h-6 text-[#a1daf8] mx-auto mb-1"></i>
+                  <span class="text-[9px] text-slate-300 font-headings block">Brak pliku</span>
+                </div>
+              </div>
+
+              <div id="admin-cover-dropzone" class="flex-grow w-full border-2 border-dashed border-[#D9D9D9] hover:border-[#0041d2] p-4 text-center cursor-pointer transition-all bg-white group">
+                <input type="file" id="admin-cover-file-input" accept="image/jpeg,image/png,image/webp,image/jpg" class="hidden" />
+                <p class="text-xs font-headings font-semibold text-[#032c73]">Kliknij lub upuść grafikę okładki</p>
+                <p class="ug-small !text-[11px] text-[#647391] mt-0.5">Automatyczne przycięcie do 600×600 px i kompresja WebP</p>
+              </div>
+
+              <button type="button" id="admin-cover-remove-btn" onclick="app.removePendingCover()" class="hidden btn-ug-outlined btn-ug-sm !text-[#EF305E] !border-[#EF305E]/40 hover:!bg-[#EF305E]/10" title="Usuń wybraną okładkę">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button onclick="app.submitNewTrackFromAdmin()" class="btn-ug-primary">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Zapisz i dodaj do listy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 ug-card space-y-4">
+          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
+            <i data-lucide="activity" class="w-5 h-5 text-[#1BA345]"></i>
+            <span>Ochrona Antyfraudowa & Status</span>
+          </h3>
+
+          <div class="space-y-3 text-xs font-body">
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
+              <span class="text-[#647391]">Limit głosowania:</span>
+              <strong class="text-[#0041d2] font-semibold">3 głosy / 24h</strong>
+            </div>
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
+              <span class="text-[#647391]">Fingerprint IP+UA:</span>
+              <strong class="text-[#1BA345] font-semibold flex items-center gap-1">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Aktywny
+              </strong>
+            </div>
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
+              <span class="text-[#647391]">Cooldown głosowania:</span>
+              <strong class="text-[#1BA345] font-semibold">86 400 sek. (PostgreSQL)</strong>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <p class="ug-small !text-[11px] !text-[#647391]">Logi audytowe są zapisywane automatycznie w relacyjnej bazie PostgreSQL (tabela AuditLog).</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-6 ug-card">
+        <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-[#0041d2]"></i>
+          <span>Wszystkie utwory w bazie (Notowanie & Poczekalnia)</span>
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
+                <th class="p-3">Tytuł</th>
+                <th class="p-3">Wykonawca</th>
+                <th class="p-3">Sekcja</th>
+                <th class="p-3">Liczba głosów</th>
+                <th class="p-3 text-right">Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tracks-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-6 ug-card space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#D9D9D9]">
+          <div>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-[#0041d2]"></i>
+              <span>Zespół Redakcyjny & Uprawnienia (RBAC)</span>
+            </h3>
+            <p class="ug-small !text-xs !text-[#647391]">Zarządzanie kontami redaktorów muzycznych, prezenterów audycji i administratorów.</p>
+          </div>
+          <button onclick="app.openAddEditorModal()" class="btn-ug-primary btn-ug-sm !text-xs flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Dodaj redaktora</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
+                <th class="p-3">Redaktor</th>
+                <th class="p-3 hidden sm:table-cell">Adres E-mail UG</th>
+                <th class="p-3">Rola w redakcji</th>
+                <th class="p-3 hidden md:table-cell">Data dodania</th>
+                <th class="p-3 text-right">Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="admin-editors-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= STICKY FLOATING VOTING DRAWER ================= -->
+  <aside id="voting-drawer" aria-label="Pasek oddawania głosu" class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#0041d2]/30 px-4 py-3.5 shadow-ug-lg transition-transform duration-300 translate-y-full">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+
+      <div class="flex items-center gap-4 w-full sm:w-auto">
+        <div class="relative flex-shrink-0">
+          <div class="w-12 h-12 bg-[#0041d2] flex items-center justify-center font-headings font-bold text-white text-base shadow-sm">
+            <span id="drawer-vote-count">0 / 3</span>
+          </div>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-headings font-bold text-[#032c73] text-sm">Twoja karta do głosowania</span>
+            <span class="ug-tag ug-tag-sail text-[10px] font-bold">Max 3 utwory</span>
+          </div>
+          <p class="ug-small !text-xs !text-[#647391] truncate">Wybierz jeszcze utwory lub zatwierdź swój głos na 24h.</p>
+          <div class="w-48 h-2 bg-[#D9D9D9] mt-1.5 overflow-hidden">
+            <div id="drawer-progress-fill" class="h-full bg-[#0041d2] transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <button onclick="app.openSubmitVoteModal()" id="drawer-submit-btn" class="btn-ug-primary w-full sm:w-auto !py-3 !px-6 !text-sm">
+          <span>Zatwierdź swój głos (0/3)</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ================= PERSISTENT MINI AUDIO PLAYER ================= -->
+  <aside id="mini-audio-player" aria-label="Odtwarzacz próbek audio" class="fixed bottom-20 sm:bottom-24 right-4 z-40 bg-white border border-[#0041d2]/30 p-3.5 shadow-ug-lg flex items-center gap-4 transition-transform duration-300 translate-y-full">
+    <div class="w-10 h-10 bg-[#0041d2] flex items-center justify-center flex-shrink-0 text-white">
+      <i data-lucide="disc-3" class="w-6 h-6 animate-spin"></i>
+    </div>
+    <div class="min-w-0 pr-2">
+      <div id="player-track-title" class="font-headings font-bold text-xs text-[#032c73] truncate max-w-[160px]">Odtwarzanie próbki...</div>
+      <div id="player-track-artist" class="ug-small truncate max-w-[160px]">Radio MORS 30s Snippet</div>
+    </div>
+    <button onclick="app.stopAudio()" id="player-play-toggle" class="p-2 bg-[#e5f5fd] hover:bg-[#a1daf8] text-[#0041d2]" title="Zatrzymaj odsłuch">
+      <i data-lucide="square" class="w-4 h-4"></i>
+    </button>
+  </aside>
+
+  <!-- ================= MODAL 0: LOGOWANIE ADMINISTRATORA / REDAKCJI ================= -->
+  <div id="admin-login-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border-2 border-[#0041d2] p-6 sm:p-8 max-w-md w-full shadow-ug-lg space-y-5">
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-[#00214d] text-white">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Logowanie Redakcji</h3>
+            <p class="ug-small">Radio MORS • Uniwersytet Gdański</p>
+          </div>
+        </div>
+        <button onclick="app.closeAdminLoginModal()" class="text-[#647391] hover:text-[#032c73] p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5">
+        <div class="ug-form-group">
+          <label class="ug-form-label">Adres e-mail w domenie UG</label>
+          <div class="relative">
+            <input type="email" id="admin-login-email" placeholder="redakcja@mors.ug.edu.pl" value="redakcja@mors.ug.edu.pl" class="ug-input pl-9" />
+            <i data-lucide="mail" class="w-4 h-4 text-[#647391] absolute left-3 top-3.5"></i>
+          </div>
+        </div>
+
+        <div class="ug-form-group">
+          <label class="ug-form-label">Hasło dostępu</label>
+          <div class="relative">
+            <input type="password" id="admin-login-password" placeholder="••••••••" value="RadioMORS2026!" class="ug-input pl-9" />
+            <i data-lucide="key" class="w-4 h-4 text-[#647391] absolute left-3 top-3.5"></i>
+          </div>
+        </div>
+
+        <div class="p-3 bg-[#e5f5fd] border border-[#0041d2]/30 flex items-center justify-between">
+          <span class="ug-small !text-[11px]">Konto testowe redaktora:</span>
+          <button type="button" onclick="app.fillDemoAdminCredentials()" class="text-xs font-headings font-bold text-[#0041d2] hover:underline">
+            Uzupełnij dane demo
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="app.closeAdminLoginModal()" class="btn-ug-outlined btn-ug-sm">
+          Anuluj
+        </button>
+        <button onclick="app.submitAdminLogin()" class="btn-ug-primary">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Zaloguj się</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 0B: DODAWANIE NOWEGO REDAKTORA ================= -->
+  <div id="admin-editor-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border-2 border-[#0041d2] p-6 sm:p-8 max-w-md w-full shadow-ug-lg space-y-5">
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-[#0041d2] text-white">
+            <i data-lucide="user-plus" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Dodaj Nowego Redaktora</h3>
+            <p class="ug-small">Radio MORS • Uniwersytet Gdański</p>
+          </div>
+        </div>
+        <button onclick="app.closeAddEditorModal()" class="text-[#647391] hover:text-[#032c73] p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5">
+        <div class="ug-form-group">
+          <label class="ug-form-label">Imię i nazwisko</label>
+          <input type="text" id="editor-input-name" placeholder="np. Magdalena Lewandowska" class="ug-input" />
+        </div>
+
+        <div class="ug-form-group">
+          <label class="ug-form-label">Adres e-mail w domenie UG</label>
+          <input type="email" id="editor-input-email" placeholder="m.lewandowska@mors.ug.edu.pl" class="ug-input" />
+        </div>
+
+        <div class="ug-form-group">
+          <label class="ug-form-label">Rola i zakres uprawnień</label>
+          <select id="editor-input-role" class="ug-select">
+            <option value="MUSIC_EDITOR">Redaktor Muzyczny (Dodawanie utworów i okładek)</option>
+            <option value="PRESENTER">Prezenter Audycji (Podgląd live i prowadzenie listy)</option>
+            <option value="SUPER_ADMIN">Główny Administrator (Pełny dostęp i zarządzanie redakcją)</option>
+          </select>
+        </div>
+
+        <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] text-xs text-[#647391]">
+          Hasło startowe konta zostanie ustawione automatycznie na wartość demo <strong class="text-[#032c73]">RadioMORS2026!</strong> — redaktor powinien zmienić je po pierwszym zalogowaniu.
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="app.closeAddEditorModal()" class="btn-ug-outlined btn-ug-sm">
+          Anuluj
+        </button>
+        <button onclick="app.submitNewEditor()" class="btn-ug-primary">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Utwórz konto redaktora</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 1: WERYFIKACJA & ZATWIERDZENIE GŁOSU ================= -->
+  <div id="vote-verify-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-[#D9D9D9] p-6 sm:p-8 max-w-lg w-full shadow-ug-lg space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-[#e5f5fd] text-[#0041d2] border border-[#0041d2]/20">
+            <i data-lucide="vote" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Potwierdź swój głos</h3>
+            <p id="modal-edition-label" class="ug-small">Lista Przebojów Radia MORS</p>
+          </div>
+        </div>
+        <button onclick="app.closeSubmitVoteModal()" class="text-[#647391] hover:text-[#032c73] p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <label class="ug-form-label">Wybrane utwory:</label>
+        <div id="modal-selected-tracks-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+      </div>
+
+      <div class="p-4 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <input type="checkbox" id="turnstile-check" checked class="w-5 h-5 accent-[#0041d2] cursor-pointer" />
+          <div>
+            <div class="text-xs font-headings font-bold text-[#032c73] flex items-center gap-1.5">
+              <span>Weryfikacja słuchacza</span>
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#1BA345]"></i>
+            </div>
+            <p class="ug-small !text-[11px]">Zabezpieczenie przed botami (Cloudflare Turnstile)</p>
+          </div>
+        </div>
+        <div class="text-[10px] text-[#647391] font-mono">ID: 8f3e..2b1c</div>
+      </div>
+
+      <div class="p-3 bg-[#FFFBEB] border border-[#FEC001]/50 text-xs text-[#92400E] flex items-start gap-2">
+        <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 mt-0.5 text-[#B45309]"></i>
+        <span>Po zatwierdzeniu Twój głos zostanie zapisany, a kolejna możliwość głosowania odblokuje się dokładnie za 24 godziny.</span>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="app.closeSubmitVoteModal()" class="px-4 py-2.5 text-[#647391] hover:text-[#032c73] text-xs font-headings font-semibold">
+          Anuluj
+        </button>
+        <button onclick="app.confirmAndCastVotes()" class="btn-ug-primary">
+          <span>Zatwierdź i oddaj głos</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: SOCIAL MEDIA SHARE STUDIO ================= -->
+  <div id="social-share-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white border border-[#D9D9D9] p-6 sm:p-8 max-w-2xl w-full shadow-ug-lg space-y-6 my-8">
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-[#e5f5fd] text-[#0041d2] border border-[#0041d2]/20">
+            <i data-lucide="share-2" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Centrum Udostępniania Wyników</h3>
+            <p class="ug-small">Pokaż znajomym na kogo głosujesz w Radiu MORS!</p>
+          </div>
+        </div>
+        <button onclick="app.closeSocialShareModal()" class="text-[#647391] hover:text-[#032c73] p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-6">
+        <div class="relative w-48 sm:w-56 h-[340px] sm:h-[390px] overflow-hidden shadow-md border-2 border-[#0041d2] flex-shrink-0 bg-[#00214d]">
+          <canvas id="social-share-canvas" class="w-full h-full object-contain"></canvas>
+          <div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 text-[9px] font-mono text-[#a1daf8]">
+            1080x1920 HD
+          </div>
+        </div>
+
+        <div class="space-y-3 w-full">
+          <p class="ug-body !text-xs !text-[#647391]">
+            Wygenerowaliśmy dedykowaną kartę graficzną w formacie <strong>Instagram Stories / TikTok / Facebook</strong> w oficjalnej kolorystyce Uniwersytetu Gdańskiego.
+          </p>
+
+          <button onclick="app.downloadSocialCard()" class="btn-ug-primary w-full !text-xs sm:!text-sm">
+            <i data-lucide="download" class="w-4 h-4"></i> Pobierz grafikę (PNG)
+          </button>
+
+          <button onclick="app.shareViaWebShare()" class="btn-ug-outlined w-full !text-xs sm:!text-sm">
+            <i data-lucide="share" class="w-4 h-4"></i> Udostępnij bezpośrednio
+          </button>
+
+          <div class="pt-2 border-t border-[#D9D9D9] text-[11px] text-[#647391] space-y-1">
+            <p>• Otaguj nas: <strong class="text-[#0041d2]">@radiomors_ug</strong></p>
+            <p>• Użyj hashtagu: <strong class="text-[#032c73]">#ListaPrzebojowMORS #UniwersytetGdański</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="app.closeSocialShareModal()" class="px-5 py-2 bg-[#F5F5F5] hover:bg-[#D9D9D9] text-[#032c73] text-xs font-headings font-semibold">
+          Zamknij
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: POTWIERDZENIE RESETU NOTOWANIA (ADMIN) ================= -->
+  <div id="admin-reset-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white border border-[#EF305E]/40 p-6 sm:p-8 max-w-md w-full shadow-ug-lg space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-[#EF305E]/10 text-[#EF305E] border border-[#EF305E]/20">
+          <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Zamknięcie i Reset Notowania</h3>
+          <p class="ug-small !text-[#EF305E]">Operacja nieodwracalna</p>
+        </div>
+      </div>
+
+      <div class="ug-body !text-xs !text-[#647391] space-y-2">
+        <p>Ta operacja wykona następujące kroki:</p>
+        <ul class="list-disc pl-4 space-y-1 text-[#1E293B]">
+          <li>Zliczy ostateczne głosy w bieżącym notowaniu.</li>
+          <li>Wyliczy nowe pozycje (awans TOP 2 z Poczekalni do Notowania).</li>
+          <li>Zarchiwizuje wyniki bieżącego wydania.</li>
+          <li>Zresetuje głosy do 0 i otworzy kolejne notowanie.</li>
+          <li>Odblokuje możliwość ponownego głosowania dla wszystkich słuchaczy.</li>
+        </ul>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button onclick="app.closeResetChartModal()" class="px-4 py-2 text-[#647391] hover:text-[#032c73] text-xs font-headings font-semibold">
+          Anuluj
+        </button>
+        <button onclick="app.executeResetChart()" class="btn-ug-primary !bg-[#EF305E] !border-[#EF305E] hover:!bg-[#d9224e]">
+          <i data-lucide="check" class="w-4 h-4"></i> Potwierdź i zresetuj
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- ================= 09. FOOTER (PAGE 15) ================= -->
+  <footer class="mt-auto">
+    <div class="ug-main-footer">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <svg viewBox="0 0 100 100" class="w-7 h-7 fill-white" aria-label="Herb UG">
+                <path d="M50 5 C30 5 15 15 15 35 C15 65 50 95 50 95 C50 95 85 65 85 35 C85 15 70 5 50 5 Z" fill="none" stroke="white" stroke-width="6"/>
+                <path d="M35 32 L40 44 L50 34 L60 44 L65 32 L68 50 L32 50 Z" fill="white"/>
+                <path d="M47 54 H53 V60 H59 V66 H53 V72 H47 V66 H41 V60 H47 Z" fill="white"/>
+                <path d="M47 74 H53 V78 H57 V82 H53 V86 H47 V82 H43 V78 H47 Z" fill="white"/>
+              </svg>
+              <span class="font-headings font-bold text-base text-white tracking-tight uppercase">Uniwersytet Gdański</span>
+            </div>
+
+            <div class="text-xs text-slate-200 space-y-1.5 font-body">
+              <p class="font-bold text-white">Rektorat Uniwersytetu Gdańskiego</p>
+              <p>ul. Jana Bażyńskiego 8, 80-309 Gdańsk</p>
+              <p>NIP: 584-020-32-39, REGON: 000001330</p>
+              <p class="pt-2 text-[#a1daf8] font-semibold">tel. portiernia: + 48 58 523 30 00</p>
+              <p class="text-slate-300">Radio MORS Studio: redakcja@mors.ug.edu.pl</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-headings font-bold text-sm text-white mb-4 uppercase tracking-wider">Informacje dla</h4>
+            <ul class="space-y-2 text-xs text-slate-200 font-body">
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Kandydaci</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Studenci</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Doktoranci</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Absolwenci</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Pracownicy</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Media</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="font-headings font-bold text-sm text-white mb-4 uppercase tracking-wider">Odnośniki</h4>
+            <ul class="space-y-2 text-xs text-slate-200 font-body">
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Kalendarz akademicki</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Helpdesk</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Gazeta Uniwersytecka</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">BIP</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Biuro Karier UG</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Deklaracja dostępności</a></li>
+              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Regulamin głosowania Radia MORS</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="ug-footer-bottom">
+      <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-300 font-body">
+        Uniwersytet Gdański 2025 • Radio MORS (Mega Otwarte Radio Studenckie) • Wszelkie prawa zastrzeżone
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

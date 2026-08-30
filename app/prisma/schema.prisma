@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TrackStatus {
+  WAITING_ROOM
+  CHART
+  ARCHIVED
+  REJECTED
+}
+
+enum EditionStatus {
+  DRAFT
+  ACTIVE
+  FROZEN
+  BROADCASTING
+  ARCHIVED
+}
+
+enum TrendDirection {
+  NEW
+  UP
+  DOWN
+  SAME
+  REENTRY
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  MUSIC_EDITOR
+  PRESENTER
+}
+
+model ChartEdition {
+  id            String        @id @default(uuid())
+  editionNumber Int           @unique
+  title         String
+  votingStartsAt DateTime
+  votingEndsAt  DateTime
+  status        EditionStatus @default(ACTIVE)
+  isCurrent     Boolean       @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  entries       ChartEntry[]
+  votes         Vote[]
+}
+
+model Track {
+  id                String      @id @default(uuid())
+  title             String
+  artist            String
+  album             String?
+  genre             String?
+  coverImageUrl     String?
+  audioUrl          String?
+  status            TrackStatus @default(WAITING_ROOM)
+  durationSeconds   Int         @default(210)
+  totalWeeksOnChart Int         @default(0)
+  peakPosition      Int?
+  bpm               Int?
+  audioKey          String?     @default("synth_chill")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  entries           ChartEntry[]
+  votes             Vote[]
+}
+
+model ChartEntry {
+  id               String         @id @default(uuid())
+  editionId        String
+  trackId          String
+  position         Int?
+  previousPosition Int?
+  trend            TrendDirection @default(NEW)
+  votesCount       Int            @default(0)
+  weeksOnChart     Int            @default(1)
+  isInWaitingRoom  Boolean        @default(false)
+  tag              String?
+
+  edition          ChartEdition   @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  track            Track          @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([editionId, trackId])
+}
+
+model Voter {
+  id                  String    @id @default(uuid())
+  voterHash           String    @unique
+  email               String?
+  isVerified          Boolean   @default(false)
+  lastVotedAt         DateTime
+  nextEligibleVoteAt  DateTime
+  trustScore          Float     @default(1.0)
+  createdAt           DateTime  @default(now())
+
+  votes               Vote[]
+}
+
+model Vote {
+  id               String   @id @default(uuid())
+  editionId        String
+  trackId          String
+  voterId          String
+  ipAddress        String
+  userAgent        String?
+  fingerprintHash  String
+  createdAt        DateTime @default(now())
+
+  edition          ChartEdition @relation(fields: [editionId], references: [id])
+  track            Track        @relation(fields: [trackId], references: [id])
+  voter            Voter        @relation(fields: [voterId], references: [id])
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String
+  role         AdminRole @default(MUSIC_EDITOR)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  admin     AdminUser @relation(fields: [adminId], references: [id])
+}
