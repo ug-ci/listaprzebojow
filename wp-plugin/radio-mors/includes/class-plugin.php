@@ -7,6 +7,12 @@ class Plugin {
         return self::$instance;
     }
     public function boot() {
-        // Kolejne taski dokładają tu rejestracje (rest_api_init, shortcode, admin_menu).
+        add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+        // Kolejne taski dokładają tu rejestracje (shortcode, admin_menu).
+    }
+
+    public function register_rest_routes() {
+        ( new \Mors\Rest\Chart() )->register();
+        ( new \Mors\Rest\Votes() )->register();
     }
 }

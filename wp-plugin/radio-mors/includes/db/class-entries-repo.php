@@ -14,6 +14,28 @@ class Entries_Repo extends Repo {
             $editionId, $waiting ? 1 : 0 );
         return $db->get_results( $sql, ARRAY_A ) ?: [];
     }
+    /** Wpisy notowania (is_waiting=0), posortowane wg pozycji rosnąco — do GET /chart/current. */
+    public function chart_by_position( $editionId ) {
+        $db = $this->wpdb(); $t = $this->t();
+        $sql = $db->prepare(
+            "SELECT e.*, tr.title, tr.artist, tr.album, tr.genre, tr.cover_image_url,
+                    tr.audio_key, tr.bpm, tr.duration_seconds, tr.peak_position,
+                    tr.total_weeks_on_chart
+             FROM {$t['entries']} e
+             JOIN {$t['tracks']} tr ON tr.id = e.track_id
+             WHERE e.edition_id = %s AND e.is_waiting = 0
+             ORDER BY e.position ASC",
+            $editionId );
+        return $db->get_results( $sql, ARRAY_A ) ?: [];
+    }
+    /** Suma votes_count po wszystkich wpisach edycji (chart + poczekalnia). */
+    public function total_votes( $editionId ) {
+        $db = $this->wpdb(); $t = $this->t();
+        $sum = $db->get_var( $db->prepare(
+            "SELECT COALESCE(SUM(votes_count),0) FROM {$t['entries']} WHERE edition_id = %s",
+            $editionId ) );
+        return (int) $sum;
+    }
     public function by_ids( array $ids, $editionId ) {
         if ( ! $ids ) { return []; }
         $db = $this->wpdb(); $t = $this->t();
