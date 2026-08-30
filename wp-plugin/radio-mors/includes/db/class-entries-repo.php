@@ -5,7 +5,7 @@ class Entries_Repo extends Repo {
         $db = $this->wpdb(); $t = $this->t();
         $sql = $db->prepare(
             "SELECT e.*, tr.title, tr.artist, tr.album, tr.genre, tr.cover_image_url,
-                    tr.audio_key, tr.bpm, tr.duration_seconds, tr.peak_position,
+                    tr.audio_url, tr.audio_key, tr.bpm, tr.duration_seconds, tr.peak_position,
                     tr.total_weeks_on_chart
              FROM {$t['entries']} e
              JOIN {$t['tracks']} tr ON tr.id = e.track_id
@@ -19,7 +19,7 @@ class Entries_Repo extends Repo {
         $db = $this->wpdb(); $t = $this->t();
         $sql = $db->prepare(
             "SELECT e.*, tr.title, tr.artist, tr.album, tr.genre, tr.cover_image_url,
-                    tr.audio_key, tr.bpm, tr.duration_seconds, tr.peak_position,
+                    tr.audio_url, tr.audio_key, tr.bpm, tr.duration_seconds, tr.peak_position,
                     tr.total_weeks_on_chart
              FROM {$t['entries']} e
              JOIN {$t['tracks']} tr ON tr.id = e.track_id
@@ -56,5 +56,13 @@ class Entries_Repo extends Repo {
         $db = $this->wpdb(); $t = $this->t();
         $db->query( $db->prepare(
             "UPDATE {$t['entries']} SET votes_count = votes_count + 1 WHERE id = %s", $entryId ) );
+    }
+    /** Najwyższa pozycja na notowaniu (is_waiting=0) w danej edycji; 0, jeśli brak wpisów. */
+    public function max_chart_position( string $editionId ): int {
+        $db = $this->wpdb(); $t = $this->t();
+        $max = $db->get_var( $db->prepare(
+            "SELECT COALESCE(MAX(position),0) FROM {$t['entries']} WHERE edition_id = %s AND is_waiting = 0",
+            $editionId ) );
+        return (int) $max;
     }
 }

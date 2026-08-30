@@ -40,6 +40,7 @@ class Schema {
             album VARCHAR(191) NULL,
             genre VARCHAR(191) NULL,
             cover_image_url TEXT NULL,
+            audio_url TEXT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'WAITING_ROOM',
             duration_seconds INT NOT NULL DEFAULT 210,
             total_weeks_on_chart INT NOT NULL DEFAULT 0,
