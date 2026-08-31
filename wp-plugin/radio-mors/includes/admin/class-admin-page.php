@@ -4,14 +4,21 @@ namespace Mors\Admin;
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * Podstrona wp-admin „Radio MORS" — hostuje tę samą SPA (templates/public-app.php,
- * assets/js/app.js) w trybie panelu redakcji. Tryb rozpoznawany przez SPA po
- * morsData.isAdminPanel/isEditor/role (patrz assets/js/app.js: refreshAdminSession(),
- * applyAdminModeUI()).
+ * Menu wp-admin „Lista przebojów" — hostuje tę samą SPA (templates/public-app.php,
+ * assets/js/app.js) w trybie panelu redakcji. Dwie podstrony:
+ *   • „Wszystkie utwory”  (slug radio-mors)          → morsData.adminSection = 'tracks'
+ *   • „Ustawienia listy”  (slug radio-mors-settings) → morsData.adminSection = 'settings'
+ * Tryb i sekcję SPA rozpoznaje po morsData (patrz assets/js/app.js:
+ * applyAdminModeUI(), applyAdminSection(), refreshAdminSession()).
  */
 class Admin_Page {
 
-    const HOOK_SUFFIX = 'toplevel_page_radio-mors';
+    const MENU_SLUG     = 'radio-mors';
+    const SETTINGS_SLUG = 'radio-mors-settings';
+
+    /** Hook suffixy stron (ustawiane w menu(), sprawdzane w assets()). */
+    private static $hook_tracks   = '';
+    private static $hook_settings = '';
 
     public static function register() {
         add_action( 'admin_menu', [ self::class, 'menu' ] );
@@ -19,23 +26,44 @@ class Admin_Page {
     }
 
     public static function menu() {
-        add_menu_page(
-            'Radio MORS',
-            'Radio MORS',
+        self::$hook_tracks = add_menu_page(
+            'Lista przebojów',
+            'Lista przebojów',
             \Mors_Enum::CAP_EDIT_MUSIC,
-            'radio-mors',
+            self::MENU_SLUG,
             [ self::class, 'render' ],
-            'dashicons-microphone',
+            'dashicons-list-view',
             30
+        );
+
+        // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Wszystkie utwory”.
+        add_submenu_page(
+            self::MENU_SLUG,
+            'Wszystkie utwory',
+            'Wszystkie utwory',
+            \Mors_Enum::CAP_EDIT_MUSIC,
+            self::MENU_SLUG,
+            [ self::class, 'render' ]
+        );
+
+        self::$hook_settings = add_submenu_page(
+            self::MENU_SLUG,
+            'Ustawienia listy',
+            'Ustawienia listy',
+            \Mors_Enum::CAP_EDIT_MUSIC,
+            self::SETTINGS_SLUG,
+            [ self::class, 'render' ]
         );
     }
 
     /**
-     * Kolejkujemy te same assety co Mors\Frontend\Shortcode (te same handle'y/wersje),
-     * ale tylko na stronie panelu, żeby nie ładować SPA w całym wp-admin.
+     * Kolejkujemy te same assety co Mors\Frontend\Shortcode, ale tylko na stronach
+     * panelu, żeby nie ładować SPA w całym wp-admin. adminSection zależy od podstrony.
      */
     public static function assets( $hook ) {
-        if ( $hook !== self::HOOK_SUFFIX ) { return; }
+        if ( $hook !== self::$hook_tracks && $hook !== self::$hook_settings ) { return; }
+
+        $section = ( $hook === self::$hook_settings ) ? 'settings' : 'tracks';
 
         wp_enqueue_style(
             \Mors\Frontend\Shortcode::HANDLE,
@@ -73,13 +101,14 @@ class Admin_Page {
         }
 
         wp_localize_script( \Mors\Frontend\Shortcode::HANDLE, 'morsData', [
-            'restUrl'        => esc_url_raw( rest_url( 'mors/v1' ) ),
-            'nonce'          => wp_create_nonce( 'wp_rest' ),
-            'isAdminPanel'   => true,
-            'isEditor'       => $can_edit,
-            'currentUserId'  => get_current_user_id(),
+            'restUrl'         => esc_url_raw( rest_url( 'mors/v1' ) ),
+            'nonce'           => wp_create_nonce( 'wp_rest' ),
+            'isAdminPanel'    => true,
+            'isEditor'        => $can_edit,
+            'currentUserId'   => get_current_user_id(),
             'currentUserName' => $current_user->display_name,
-            'role'           => $role,
+            'role'            => $role,
+            'adminSection'    => $section,
         ] );
     }
 

@@ -70,19 +70,48 @@ class StudentRadioApp {
     this.startPolling();
     this.startCountdownTimer();
     this.updateAdminAuthUI();
+    // W backendzie (wp-admin) otwieramy od razu widok zarządzania (Panel Redaktora).
+    if (MORS.isAdminPanel && this.adminUser) this.switchTab('admin');
     morsCreateIcons();
   }
 
   // Na publicznej stronie (isAdminPanel=false) chowamy przełącznik "Panel Redaktora"
   // oraz wewnątrz-SPA modal logowania — WordPress ma osobny panel administracyjny.
   applyAdminModeUI() {
-    if (MORS.isAdminPanel) return;
+    if (MORS.isAdminPanel) {
+      // W panelu wp-admin chowamy publiczny nagłówek (.mors-chrome) — WordPress ma własną belkę.
+      document.querySelectorAll('.mors-chrome').forEach((el) => el.classList.add('hidden'));
+      // Pokazujemy właściwą podsekcję zależnie od podmenu (Wszystkie utwory / Ustawienia listy).
+      this.applyAdminSection();
+      return;
+    }
     const adminTabBtn = document.querySelector('.nav-tab-btn[data-tab="admin"]');
     if (adminTabBtn) adminTabBtn.classList.add('hidden');
     const loginModal = document.getElementById('admin-login-modal');
     if (loginModal) loginModal.classList.add('hidden');
     const adminView = document.getElementById('view-admin');
     if (adminView) adminView.classList.add('hidden');
+  }
+
+  // Pokazuje podsekcję panelu zależnie od morsData.adminSection ('tracks' | 'settings').
+  applyAdminSection() {
+    const section = (MORS.adminSection === 'settings') ? 'settings' : 'tracks';
+    const tracks = document.getElementById('admin-section-tracks');
+    const settings = document.getElementById('admin-section-settings');
+    if (tracks) tracks.classList.toggle('hidden', section !== 'tracks');
+    if (settings) settings.classList.toggle('hidden', section !== 'settings');
+  }
+
+  // Uzupełnia kartę "Ustawienia listy" danymi bieżącej edycji.
+  renderSettingsInfo() {
+    const ed = this.state.edition;
+    if (!ed) return;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    set('settings-edition-num', `#${ed.number != null ? ed.number : '--'}`);
+    set('settings-edition-status', ed.status || '--');
+    set('settings-edition-votes', ed.totalVotesCount != null ? ed.totalVotesCount : 0);
+    const ends = ed.endsAt ? new Date(ed.endsAt) : null;
+    set('settings-edition-ends', (ends && !isNaN(ends.getTime())) ? ends.toLocaleString('pl-PL') : '--');
   }
 
   // --- API HELPERS ---
@@ -194,9 +223,6 @@ class StudentRadioApp {
         fullName: MORS.currentUserName || 'Redaktor',
         role: MORS.role || 'MUSIC_EDITOR',
       };
-      if (this.adminUser.role === 'SUPER_ADMIN') {
-        await this.refreshEditors();
-      }
     } else {
       this.adminUser = null;
     }
@@ -1103,7 +1129,7 @@ class StudentRadioApp {
     this.renderWaitingRoomList();
     this.renderVotingDrawer();
     this.renderAdminList();
-    this.renderEditorsList();
+    this.renderSettingsInfo();
     morsCreateIcons();
   }
 

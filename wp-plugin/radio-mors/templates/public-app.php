@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 ?>
 <div id="mors-app" class="mors-app bg-[#F5F5F5] text-[#1E293B] min-h-screen flex flex-col selection:bg-[#a1daf8] selection:text-[#00214d]">
   <!-- ================= 08. TOP NAVIGATION BAR (PAGE 14) ================= -->
-  <div class="ug-top-navbar border-b border-[#001736]">
+  <div class="ug-top-navbar mors-chrome border-b border-[#001736]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
 
       <!-- UG Emblem & Brand Logo -->
@@ -46,7 +46,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   </div>
 
   <!-- ================= TOP ON-AIR NOTIFICATION BAR ================= -->
-  <aside aria-label="Informacja o audycji" class="bg-[#032c73] text-white border-b border-[#0041d2]/40 py-2 px-4 text-xs font-body">
+  <aside aria-label="Informacja o audycji" class="mors-chrome bg-[#032c73] text-white border-b border-[#0041d2]/40 py-2 px-4 text-xs font-body">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2.5">
         <span class="flex h-2.5 w-2.5 relative">
@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   </aside>
 
   <!-- ================= MAIN HEADER & SUB-NAVIGATION ================= -->
-  <header class="bg-white border-b border-[#D9D9D9] sticky top-0 z-30 shadow-sm">
+  <header class="mors-chrome bg-white border-b border-[#D9D9D9] sticky top-0 z-30 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
 
       <div class="flex items-center gap-3">
@@ -192,27 +192,12 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
     <!-- ================= VIEW 3: PANEL ADMINISTRATORA (CMS) ================= -->
     <section id="view-admin" class="hidden space-y-8">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 bg-white border border-[#D9D9D9] shadow-sm">
-        <div class="flex items-center gap-3.5">
-          <div class="p-3 bg-[#e5f5fd] text-[#0041d2] border border-[#0041d2]/30">
-            <i data-lucide="shield-check" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h2 class="ug-h3 !text-xl !font-bold !text-[#032c73]">Panel Redaktora / Administratora</h2>
-            <p class="ug-small !text-xs !text-[#647391]">Zarządzanie bazą utworów, uploadem próbek audio oraz procedurą zamknięcia notowania.</p>
-          </div>
-        </div>
 
-        <div class="flex items-center gap-3">
-          <button onclick="app.openResetChartModal()" class="btn-ug-primary !bg-[#EF305E] !border-[#EF305E] hover:!bg-[#d9224e] !text-white text-xs sm:text-sm">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            <span>Zamknij i zresetuj notowanie</span>
-          </button>
-        </div>
-      </div>
+      <!-- ===== PODSEKCJA: Wszystkie utwory ===== -->
+      <div id="admin-section-tracks" class="space-y-8">
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 p-6 ug-card space-y-5">
+      <div class="grid grid-cols-1 gap-6">
+        <div class="p-6 ug-card space-y-5">
           <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
             <i data-lucide="upload-cloud" class="w-5 h-5 text-[#0041d2]"></i>
             <span>Dodaj nowy utwór (.WAV / .MP3)</span>
@@ -299,34 +284,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
           </div>
         </div>
 
-        <div class="p-6 ug-card space-y-4">
-          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
-            <i data-lucide="activity" class="w-5 h-5 text-[#1BA345]"></i>
-            <span>Ochrona Antyfraudowa & Status</span>
-          </h3>
-
-          <div class="space-y-3 text-xs font-body">
-            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
-              <span class="text-[#647391]">Limit głosowania:</span>
-              <strong class="text-[#0041d2] font-semibold">3 głosy / 24h</strong>
-            </div>
-            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
-              <span class="text-[#647391]">Fingerprint IP+UA:</span>
-              <strong class="text-[#1BA345] font-semibold flex items-center gap-1">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i> Aktywny
-              </strong>
-            </div>
-            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
-              <span class="text-[#647391]">Cooldown głosowania:</span>
-              <strong class="text-[#1BA345] font-semibold">86 400 sek. (PostgreSQL)</strong>
-            </div>
-          </div>
-
-          <div class="pt-2">
-            <p class="ug-small !text-[11px] !text-[#647391]">Logi audytowe są zapisywane automatycznie w relacyjnej bazie PostgreSQL (tabela AuditLog).</p>
-          </div>
-        </div>
-
       </div>
 
       <div class="p-6 ug-card">
@@ -350,36 +307,47 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
         </div>
       </div>
 
-      <div class="p-6 ug-card space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#D9D9D9]">
-          <div>
-            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] flex items-center gap-2">
-              <i data-lucide="users" class="w-5 h-5 text-[#0041d2]"></i>
-              <span>Zespół Redakcyjny & Uprawnienia (RBAC)</span>
-            </h3>
-            <p class="ug-small !text-xs !text-[#647391]">Zarządzanie kontami redaktorów muzycznych, prezenterów audycji i administratorów.</p>
-          </div>
-          <button onclick="app.openAddEditorModal()" class="btn-ug-primary btn-ug-sm !text-xs flex items-center gap-1.5">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            <span>Dodaj redaktora</span>
-          </button>
-        </div>
+      </div><!-- /#admin-section-tracks -->
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
-                <th class="p-3">Redaktor</th>
-                <th class="p-3 hidden sm:table-cell">Adres E-mail UG</th>
-                <th class="p-3">Rola w redakcji</th>
-                <th class="p-3 hidden md:table-cell">Data dodania</th>
-                <th class="p-3 text-right">Akcje</th>
-              </tr>
-            </thead>
-            <tbody id="admin-editors-table-body"></tbody>
-          </table>
+      <!-- ===== PODSEKCJA: Ustawienia listy ===== -->
+      <div id="admin-section-settings" class="hidden space-y-6">
+        <div class="p-6 ug-card space-y-5">
+          <div class="flex items-center gap-2">
+            <i data-lucide="settings" class="w-5 h-5 text-[#0041d2]"></i>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Ustawienia listy przebojów</h3>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-body">
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9]">
+              <div class="text-[#647391]">Notowanie</div>
+              <strong id="settings-edition-num" class="text-[#032c73] text-base font-headings font-bold">#--</strong>
+            </div>
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9]">
+              <div class="text-[#647391]">Status</div>
+              <strong id="settings-edition-status" class="text-[#0041d2] font-semibold">--</strong>
+            </div>
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9]">
+              <div class="text-[#647391]">Koniec głosowania</div>
+              <strong id="settings-edition-ends" class="text-[#032c73] font-mono font-semibold">--</strong>
+            </div>
+            <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9]">
+              <div class="text-[#647391]">Głosów łącznie</div>
+              <strong id="settings-edition-votes" class="text-[#032c73] font-mono font-semibold">0</strong>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-[#D9D9D9] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div class="font-headings font-bold text-sm text-[#032c73]">Zamknięcie i reset notowania</div>
+              <p class="ug-small !text-xs !text-[#647391]">Archiwizuje bieżące notowanie, promuje utwory z poczekalni, zeruje głosy i otwiera nowe notowanie.</p>
+            </div>
+            <button onclick="app.openResetChartModal()" class="btn-ug-primary !bg-[#EF305E] !border-[#EF305E] hover:!bg-[#d9224e] !text-white text-xs sm:text-sm flex-shrink-0">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              <span>Zamknij i zresetuj notowanie</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </div><!-- /#admin-section-settings -->
 
     </section>
 
@@ -488,62 +456,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     </div>
   </div>
 
-  <!-- ================= MODAL 0B: DODAWANIE NOWEGO REDAKTORA ================= -->
-  <div id="admin-editor-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-white border-2 border-[#0041d2] p-6 sm:p-8 max-w-md w-full shadow-ug-lg space-y-5">
-
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 bg-[#0041d2] text-white">
-            <i data-lucide="user-plus" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Dodaj Nowego Redaktora</h3>
-            <p class="ug-small">Radio MORS • Uniwersytet Gdański</p>
-          </div>
-        </div>
-        <button onclick="app.closeAddEditorModal()" class="text-[#647391] hover:text-[#032c73] p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3.5">
-        <div class="ug-form-group">
-          <label class="ug-form-label">Imię i nazwisko</label>
-          <input type="text" id="editor-input-name" placeholder="np. Magdalena Lewandowska" class="ug-input" />
-        </div>
-
-        <div class="ug-form-group">
-          <label class="ug-form-label">Adres e-mail w domenie UG</label>
-          <input type="email" id="editor-input-email" placeholder="m.lewandowska@mors.ug.edu.pl" class="ug-input" />
-        </div>
-
-        <div class="ug-form-group">
-          <label class="ug-form-label">Rola i zakres uprawnień</label>
-          <select id="editor-input-role" class="ug-select">
-            <option value="MUSIC_EDITOR">Redaktor Muzyczny (Dodawanie utworów i okładek)</option>
-            <option value="PRESENTER">Prezenter Audycji (Podgląd live i prowadzenie listy)</option>
-            <option value="SUPER_ADMIN">Główny Administrator (Pełny dostęp i zarządzanie redakcją)</option>
-          </select>
-        </div>
-
-        <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] text-xs text-[#647391]">
-          Hasło startowe konta zostanie ustawione automatycznie na wartość demo <strong class="text-[#032c73]">RadioMORS2026!</strong> — redaktor powinien zmienić je po pierwszym zalogowaniu.
-        </div>
-      </div>
-
-      <div class="flex items-center justify-end gap-3 pt-2">
-        <button onclick="app.closeAddEditorModal()" class="btn-ug-outlined btn-ug-sm">
-          Anuluj
-        </button>
-        <button onclick="app.submitNewEditor()" class="btn-ug-primary">
-          <i data-lucide="check" class="w-4 h-4"></i>
-          <span>Utwórz konto redaktora</span>
-        </button>
-      </div>
-
-    </div>
-  </div>
 
   <!-- ================= MODAL 1: WERYFIKACJA & ZATWIERDZENIE GŁOSU ================= -->
   <div id="vote-verify-modal" class="hidden fixed inset-0 z-50 ug-modal-backdrop flex items-center justify-center p-4">
