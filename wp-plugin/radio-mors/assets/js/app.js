@@ -93,13 +93,15 @@ class StudentRadioApp {
     if (adminView) adminView.classList.add('hidden');
   }
 
-  // Pokazuje podsekcję panelu zależnie od morsData.adminSection ('tracks' | 'settings').
+  // Pokazuje podsekcję panelu zależnie od morsData.adminSection
+  // ('dashboard' | 'chart' | 'waiting' | 'settings').
   applyAdminSection() {
-    const section = (MORS.adminSection === 'settings') ? 'settings' : 'tracks';
-    const tracks = document.getElementById('admin-section-tracks');
-    const settings = document.getElementById('admin-section-settings');
-    if (tracks) tracks.classList.toggle('hidden', section !== 'tracks');
-    if (settings) settings.classList.toggle('hidden', section !== 'settings');
+    const sections = ['dashboard', 'chart', 'waiting', 'settings'];
+    const active = sections.includes(MORS.adminSection) ? MORS.adminSection : 'dashboard';
+    sections.forEach((s) => {
+      const el = document.getElementById('admin-section-' + s);
+      if (el) el.classList.toggle('hidden', s !== active);
+    });
   }
 
   // Uzupełnia kartę "Ustawienia listy" danymi bieżącej edycji.
@@ -144,16 +146,25 @@ class StudentRadioApp {
 
   async apiUpload(path, formData) {
     // Upload (POST multipart) — również żądanie piszące, dodajemy nonce WP REST.
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'X-WP-Nonce': (window.morsData && window.morsData.nonce) || '',
-      },
-      body: formData,
-    });
-    const data = await res.json().catch(() => ({}));
-    return { ok: res.ok, status: res.status, data };
+    // Łapiemy błędy sieci/serwera (np. 413 przerywa połączenie i fetch rzuca
+    // NetworkError) — inaczej nieobsłużony wyjątek zawiesza UI na "Wgrywanie...".
+    try {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'X-WP-Nonce': (window.morsData && window.morsData.nonce) || '',
+        },
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!data.message && res.status === 413) {
+        data.message = 'Plik jest zbyt duży — przekracza limit serwera (upload_max_filesize / client_max_body_size).';
+      }
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      return { ok: false, status: 0, data: { message: 'Błąd sieci lub plik zbyt duży dla serwera. Spróbuj mniejszego pliku.' } };
+    }
   }
 
   // --- STATE LOADING FROM SERVER ---
@@ -1028,6 +1039,8 @@ class StudentRadioApp {
     const { ok, data } = await this.apiUpload('/admin/tracks/upload', formData);
     if (!ok) {
       this.showToast(data.message || 'Nie udało się dodać utworu.', 'warning');
+      const st = document.getElementById('admin-upload-status');
+      if (st) st.classList.add('hidden');
       return;
     }
 
@@ -1354,11 +1367,9 @@ class StudentRadioApp {
     }
   }
 
-  renderAdminList() {
-    const container = document.getElementById('admin-tracks-table-body');
-    if (!container) return;
-
-    container.innerHTML = this.adminTracks.map((t) => `
+  // Wiersz tabeli zarządzania utworem (bez kolumny sekcji — tabele są per-sekcja).
+  adminTrackRow(t) {
+    return `
       <tr class="border-b border-[#D9D9D9] hover:bg-[#e5f5fd]/50 text-xs">
         <td class="p-3">
           <div class="flex items-center gap-2">
@@ -1369,19 +1380,37 @@ class StudentRadioApp {
           </div>
         </td>
         <td class="p-3 text-[#647391]">${escapeHtml(t.artist)}</td>
-        <td class="p-3">
-          <span class="ug-tag ${t.section === 'Notowanie' ? 'ug-tag-blue' : 'ug-tag-sail'}">
-            ${t.section}
-          </span>
-        </td>
         <td class="p-3 font-headings font-bold text-[#032c73]">${t.votes || 0} pkt</td>
         <td class="p-3 text-right">
           <button onclick="app.removeTrackAdmin('${t.id}')" class="text-[#EF305E] hover:text-[#d9224e] p-1.5 hover:bg-[#EF305E]/10" title="Usuń utwór">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+  }
+
+  renderAdminList() {
+    const chart = this.adminTracks.filter((t) => t.section === 'Notowanie');
+    const waiting = this.adminTracks.filter((t) => t.section === 'Poczekalnia');
+
+    const chartBody = document.getElementById('admin-chart-table-body');
+    if (chartBody) {
+      chartBody.innerHTML = chart.length
+        ? chart.map((t) => this.adminTrackRow(t)).join('')
+        : '<tr><td colspan="4" class="p-4 text-center text-[#647391] text-xs">Brak utworów w notowaniu.</td></tr>';
+    }
+    const waitingBody = document.getElementById('admin-waiting-table-body');
+    if (waitingBody) {
+      waitingBody.innerHTML = waiting.length
+        ? waiting.map((t) => this.adminTrackRow(t)).join('')
+        : '<tr><td colspan="4" class="p-4 text-center text-[#647391] text-xs">Brak utworów w poczekalni.</td></tr>';
+    }
+
+    // Skrót na "Panel redaktora".
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    set('dash-chart-count', chart.length);
+    set('dash-waiting-count', waiting.length);
+    if (this.state.edition) set('dash-edition-num', `#${this.state.edition.number}`);
   }
 
   async removeTrackAdmin(id) {

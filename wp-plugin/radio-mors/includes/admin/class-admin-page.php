@@ -5,20 +5,23 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * Menu wp-admin „Lista przebojów" — hostuje tę samą SPA (templates/public-app.php,
- * assets/js/app.js) w trybie panelu redakcji. Dwie podstrony:
- *   • „Wszystkie utwory”  (slug radio-mors)          → morsData.adminSection = 'tracks'
- *   • „Ustawienia listy”  (slug radio-mors-settings) → morsData.adminSection = 'settings'
- * Tryb i sekcję SPA rozpoznaje po morsData (patrz assets/js/app.js:
- * applyAdminModeUI(), applyAdminSection(), refreshAdminSession()).
+ * assets/js/app.js) w trybie panelu redakcji. Cztery podstrony (każda ustawia
+ * morsData.adminSection, po którym SPA pokazuje właściwą sekcję — patrz
+ * assets/js/app.js: applyAdminSection()):
+ *   • „Panel redaktora”  (slug radio-mors)          → 'dashboard' (upload + skrót)
+ *   • „Notowanie”        (slug radio-mors-chart)    → 'chart'
+ *   • „Poczekalnia”      (slug radio-mors-waiting)  → 'waiting'
+ *   • „Ustawienia listy” (slug radio-mors-settings) → 'settings'
  */
 class Admin_Page {
 
     const MENU_SLUG     = 'radio-mors';
+    const CHART_SLUG    = 'radio-mors-chart';
+    const WAITING_SLUG  = 'radio-mors-waiting';
     const SETTINGS_SLUG = 'radio-mors-settings';
 
-    /** Hook suffixy stron (ustawiane w menu(), sprawdzane w assets()). */
-    private static $hook_tracks   = '';
-    private static $hook_settings = '';
+    /** Mapa: hook suffix strony => nazwa sekcji SPA (ustawiane w menu(), czytane w assets()). */
+    private static $section_by_hook = [];
 
     public static function register() {
         add_action( 'admin_menu', [ self::class, 'menu' ] );
@@ -26,34 +29,28 @@ class Admin_Page {
     }
 
     public static function menu() {
-        self::$hook_tracks = add_menu_page(
+        $cap = \Mors_Enum::CAP_EDIT_MUSIC;
+
+        $top = add_menu_page(
             'Lista przebojów',
             'Lista przebojów',
-            \Mors_Enum::CAP_EDIT_MUSIC,
+            $cap,
             self::MENU_SLUG,
             [ self::class, 'render' ],
             'dashicons-list-view',
             30
         );
 
-        // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Wszystkie utwory”.
-        add_submenu_page(
-            self::MENU_SLUG,
-            'Wszystkie utwory',
-            'Wszystkie utwory',
-            \Mors_Enum::CAP_EDIT_MUSIC,
-            self::MENU_SLUG,
-            [ self::class, 'render' ]
-        );
+        // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Panel redaktora”.
+        $dash = add_submenu_page( self::MENU_SLUG, 'Panel redaktora', 'Panel redaktora', $cap, self::MENU_SLUG, [ self::class, 'render' ] );
+        $chart = add_submenu_page( self::MENU_SLUG, 'Notowanie', 'Notowanie', $cap, self::CHART_SLUG, [ self::class, 'render' ] );
+        $waiting = add_submenu_page( self::MENU_SLUG, 'Poczekalnia', 'Poczekalnia', $cap, self::WAITING_SLUG, [ self::class, 'render' ] );
+        $settings = add_submenu_page( self::MENU_SLUG, 'Ustawienia listy', 'Ustawienia listy', $cap, self::SETTINGS_SLUG, [ self::class, 'render' ] );
 
-        self::$hook_settings = add_submenu_page(
-            self::MENU_SLUG,
-            'Ustawienia listy',
-            'Ustawienia listy',
-            \Mors_Enum::CAP_EDIT_MUSIC,
-            self::SETTINGS_SLUG,
-            [ self::class, 'render' ]
-        );
+        self::$section_by_hook = [];
+        foreach ( [ $top => 'dashboard', $dash => 'dashboard', $chart => 'chart', $waiting => 'waiting', $settings => 'settings' ] as $hook => $section ) {
+            if ( $hook ) { self::$section_by_hook[ $hook ] = $section; }
+        }
     }
 
     /**
@@ -61,9 +58,8 @@ class Admin_Page {
      * panelu, żeby nie ładować SPA w całym wp-admin. adminSection zależy od podstrony.
      */
     public static function assets( $hook ) {
-        if ( $hook !== self::$hook_tracks && $hook !== self::$hook_settings ) { return; }
-
-        $section = ( $hook === self::$hook_settings ) ? 'settings' : 'tracks';
+        if ( ! isset( self::$section_by_hook[ $hook ] ) ) { return; }
+        $section = self::$section_by_hook[ $hook ];
 
         wp_enqueue_style(
             \Mors\Frontend\Shortcode::HANDLE,

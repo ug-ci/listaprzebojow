@@ -12,38 +12,6 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 ?>
 <div id="mors-app" class="mors-app bg-[#F5F5F5] text-[#1E293B] min-h-screen flex flex-col selection:bg-[#a1daf8] selection:text-[#00214d]">
-  <!-- ================= 08. TOP NAVIGATION BAR (PAGE 14) ================= -->
-  <div class="ug-top-navbar mors-chrome border-b border-[#001736]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-
-      <!-- UG Emblem & Brand Logo -->
-      <div class="flex items-center gap-3.5 cursor-pointer" onclick="app.switchTab('chart')">
-        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white/10 p-1 border border-white/20">
-          <svg viewBox="0 0 100 100" class="w-8 h-8 fill-white" aria-label="Herb Uniwersytetu Gdańskiego">
-            <path d="M50 5 C30 5 15 15 15 35 C15 65 50 95 50 95 C50 95 85 65 85 35 C85 15 70 5 50 5 Z" fill="none" stroke="white" stroke-width="6"/>
-            <path d="M35 32 L40 44 L50 34 L60 44 L65 32 L68 50 L32 50 Z" fill="white"/>
-            <path d="M47 54 H53 V60 H59 V66 H53 V72 H47 V66 H41 V60 H47 Z" fill="white"/>
-            <path d="M47 74 H53 V78 H57 V82 H53 V86 H47 V82 H43 V78 H47 Z" fill="white"/>
-          </svg>
-        </div>
-
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-headings font-bold text-lg sm:text-xl tracking-tight text-white uppercase">Uniwersytet Gdański</span>
-            <span class="hidden sm:inline-block w-1.5 h-1.5 bg-[#a1daf8]"></span>
-            <span class="hidden sm:inline font-headings font-semibold text-sm text-[#a1daf8] tracking-wider">RADIO MORS</span>
-          </div>
-          <p class="text-[11px] text-slate-300 font-body">Mega Otwarte Radio Studenckie • 98.4 FM & Online</p>
-        </div>
-      </div>
-
-      <!-- Header actions -->
-      <div class="flex items-center gap-3 text-xs">
-        <div id="header-admin-auth-widget" class="flex items-center"></div>
-      </div>
-
-    </div>
-  </div>
 
   <!-- ================= TOP ON-AIR NOTIFICATION BAR ================= -->
   <aside aria-label="Informacja o audycji" class="mors-chrome bg-[#032c73] text-white border-b border-[#0041d2]/40 py-2 px-4 text-xs font-body">
@@ -193,8 +161,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     <!-- ================= VIEW 3: PANEL ADMINISTRATORA (CMS) ================= -->
     <section id="view-admin" class="hidden space-y-8">
 
-      <!-- ===== PODSEKCJA: Wszystkie utwory ===== -->
-      <div id="admin-section-tracks" class="space-y-8">
+      <!-- ===== PODSEKCJA: Panel redaktora (dodawanie utworu) ===== -->
+      <div id="admin-section-dashboard" class="space-y-8">
 
       <div class="grid grid-cols-1 gap-6">
         <div class="p-6 ug-card space-y-5">
@@ -209,13 +177,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
               <i data-lucide="music" class="w-6 h-6"></i>
             </div>
             <p class="text-sm font-headings font-semibold text-[#032c73]">Przeciągnij plik audio lub <span class="text-[#0041d2] underline">wybierz z dysku</span></p>
-            <p class="ug-small !text-xs !text-[#647391] mt-1">Obsługiwane formaty: <strong>.WAV</strong> (bezstratny) lub <strong>.MP3</strong> (min. 320 kbps). Max 50 MB.</p>
+            <p class="ug-small !text-xs !text-[#647391] mt-1">Obsługiwane formaty: <strong>.WAV</strong> lub <strong>.MP3</strong>. Max 15 MB (zależnie od limitu uploadu serwera).</p>
           </div>
 
           <div id="admin-upload-status" class="hidden p-4 bg-[#e5f5fd] border border-[#0041d2]/30 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-[#0041d2] font-semibold flex items-center gap-1.5">
-                <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Przetwarzanie audio (EBU R128 & Waveform peak extraction)...
+                <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Wgrywanie pliku audio...
               </span>
               <span class="text-[#032c73] font-mono font-bold">100%</span>
             </div>
@@ -252,7 +220,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
                 <i data-lucide="image" class="w-4 h-4 text-[#0041d2]"></i>
                 <span>Okładka utworu / singla (.JPG, .PNG, .WEBP)</span>
               </label>
-              <span class="ug-small !text-[11px]">Format 1:1, Max 10 MB</span>
+              <span class="ug-small !text-[11px]">Format 1:1, Max 2 MB</span>
             </div>
 
             <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -286,28 +254,69 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
       </div>
 
-      <div class="p-6 ug-card">
-        <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
-          <i data-lucide="database" class="w-5 h-5 text-[#0041d2]"></i>
-          <span>Wszystkie utwory w bazie (Notowanie & Poczekalnia)</span>
-        </h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
-                <th class="p-3">Tytuł</th>
-                <th class="p-3">Wykonawca</th>
-                <th class="p-3">Sekcja</th>
-                <th class="p-3">Liczba głosów</th>
-                <th class="p-3 text-right">Akcje</th>
-              </tr>
-            </thead>
-            <tbody id="admin-tracks-table-body"></tbody>
-          </table>
+      <!-- Skrót -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-body">
+        <div class="p-4 bg-white border border-[#D9D9D9] shadow-sm">
+          <div class="text-[#647391]">Bieżące notowanie</div>
+          <strong id="dash-edition-num" class="text-[#032c73] text-lg font-headings font-bold">#--</strong>
+        </div>
+        <div class="p-4 bg-white border border-[#D9D9D9] shadow-sm">
+          <div class="text-[#647391]">Utworów w notowaniu</div>
+          <strong id="dash-chart-count" class="text-[#0041d2] text-lg font-headings font-bold">0</strong>
+        </div>
+        <div class="p-4 bg-white border border-[#D9D9D9] shadow-sm">
+          <div class="text-[#647391]">Utworów w poczekalni</div>
+          <strong id="dash-waiting-count" class="text-[#0041d2] text-lg font-headings font-bold">0</strong>
         </div>
       </div>
 
-      </div><!-- /#admin-section-tracks -->
+      </div><!-- /#admin-section-dashboard -->
+
+      <!-- ===== PODSEKCJA: Notowanie ===== -->
+      <div id="admin-section-chart" class="hidden space-y-6">
+        <div class="p-6 ug-card">
+          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
+            <i data-lucide="list-ordered" class="w-5 h-5 text-[#0041d2]"></i>
+            <span>Notowanie — TOP 20</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
+                  <th class="p-3">Tytuł</th>
+                  <th class="p-3">Wykonawca</th>
+                  <th class="p-3">Głosy</th>
+                  <th class="p-3 text-right">Akcje</th>
+                </tr>
+              </thead>
+              <tbody id="admin-chart-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /#admin-section-chart -->
+
+      <!-- ===== PODSEKCJA: Poczekalnia ===== -->
+      <div id="admin-section-waiting" class="hidden space-y-6">
+        <div class="p-6 ug-card">
+          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
+            <i data-lucide="inbox" class="w-5 h-5 text-[#0041d2]"></i>
+            <span>Poczekalnia</span>
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
+                  <th class="p-3">Tytuł</th>
+                  <th class="p-3">Wykonawca</th>
+                  <th class="p-3">Głosy</th>
+                  <th class="p-3 text-right">Akcje</th>
+                </tr>
+              </thead>
+              <tbody id="admin-waiting-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /#admin-section-waiting -->
 
       <!-- ===== PODSEKCJA: Ustawienia listy ===== -->
       <div id="admin-section-settings" class="hidden space-y-6">
