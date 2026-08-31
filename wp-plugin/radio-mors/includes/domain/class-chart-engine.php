@@ -38,6 +38,28 @@ class Chart_Engine {
     }
 
     /**
+     * Zapisuje nową kolejność notowania (drag & drop w panelu).
+     * $trackIds — track_id wpisów notowania (is_waiting=0) w docelowej kolejności;
+     * pozycja = indeks+1. Całość w transakcji.
+     */
+    public function reorder_chart( $adminId, array $trackIds ) {
+        $ed = ( new Editions_Repo() )->current();
+        if ( ! $ed ) {
+            throw new \RuntimeException( 'Brak aktywnego notowania.' );
+        }
+        $entriesRepo = new Entries_Repo();
+        $votesRepo   = new Votes_Repo();
+
+        $votesRepo->tx( function () use ( $entriesRepo, $ed, $trackIds ) {
+            $entriesRepo->reorder_chart( $ed['id'], $trackIds );
+        } );
+
+        $votesRepo->log( $adminId, 'CHART_REORDER', [ 'editionId' => $ed['id'], 'count' => count( $trackIds ) ] );
+
+        return [ 'success' => true ];
+    }
+
+    /**
      * Resetuje notowanie i publikuje nowe wydanie:
      *  - top 18 z listy -> pozycje 1..18 (trend wg starej/nowej pozycji, peak/weeks na Track).
      *  - top 2 z poczekalni -> pozycje 19..20 (trend NEW).

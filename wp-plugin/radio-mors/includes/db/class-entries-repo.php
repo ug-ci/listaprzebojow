@@ -65,4 +65,19 @@ class Entries_Repo extends Repo {
             $editionId ) );
         return (int) $max;
     }
+
+    /**
+     * Ustawia pozycje wpisów notowania (is_waiting=0) wg podanej kolejności track_id.
+     * Pozycja = indeks+1. Wywoływać w transakcji (Chart_Engine::reorder_chart).
+     */
+    public function reorder_chart( $editionId, array $trackIds ) {
+        $db = $this->wpdb(); $t = $this->t();
+        $pos = 1;
+        foreach ( $trackIds as $trackId ) {
+            $db->query( $db->prepare(
+                "UPDATE {$t['entries']} SET position = %d WHERE edition_id = %s AND track_id = %s AND is_waiting = 0",
+                $pos, $editionId, $trackId ) );
+            $pos++;
+        }
+    }
 }

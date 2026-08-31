@@ -96,9 +96,8 @@ class StudentRadioApp {
   // Pokazuje podsekcję panelu zależnie od morsData.adminSection
   // ('dashboard' | 'chart' | 'waiting' | 'settings').
   applyAdminSection() {
-    const sections = ['dashboard', 'chart', 'waiting', 'settings'];
-    const active = sections.includes(MORS.adminSection) ? MORS.adminSection : 'dashboard';
-    sections.forEach((s) => {
+    const active = (MORS.adminSection === 'settings') ? 'settings' : 'dashboard';
+    ['dashboard', 'settings'].forEach((s) => {
       const el = document.getElementById('admin-section-' + s);
       if (el) el.classList.toggle('hidden', s !== active);
     });
@@ -493,7 +492,10 @@ class StudentRadioApp {
     this.stopAudio();
     this.currentPlayingId = trackId;
 
-    const track = [...this.state.chartTracks, ...this.state.waitingRoomTracks].find((t) => t.id === trackId) || {};
+    // Publiczne wpisy mają id = id wpisu; admin-tracki mają id = id utworu (trackId).
+    // Dopasowujemy po obu, żeby Play działał także w tabelach panelu.
+    const track = [...this.state.chartTracks, ...this.state.waitingRoomTracks]
+      .find((t) => t.id === trackId || t.trackId === trackId) || {};
 
     if (track.audioUrl) {
       // Utwór ma wgrany prawdziwy plik audio (serwowany z /uploads/audio) — gramy go.
@@ -506,6 +508,7 @@ class StudentRadioApp {
 
     this.updateMiniPlayer(trackId, track.title, track.artist, true);
     this.renderAudioVisualizers(true);
+    this.syncAdminPlayIcons();
 
     if (this.audioTimeout) clearTimeout(this.audioTimeout);
     this.audioTimeout = setTimeout(() => {
@@ -620,6 +623,15 @@ class StudentRadioApp {
     this.currentPlayingId = null;
     this.updateMiniPlayer(null, null, null, false);
     this.renderAudioVisualizers(false);
+    this.syncAdminPlayIcons();
+  }
+
+  // Odświeża ikony Play/Stop w tabelach panelu (tylko w wp-admin).
+  syncAdminPlayIcons() {
+    if (window.morsData && window.morsData.isAdminPanel) {
+      this.renderAdminList();
+      morsCreateIcons();
+    }
   }
 
   updateMiniPlayer(trackId, title, artist, isPlaying) {
@@ -1368,11 +1380,16 @@ class StudentRadioApp {
   }
 
   // Wiersz tabeli zarządzania utworem (bez kolumny sekcji — tabele są per-sekcja).
-  adminTrackRow(t) {
+  adminTrackRow(t, draggable = false) {
+    const isPlaying = this.currentPlayingId === t.id;
+    const sectionTag = t.section === 'Notowanie' ? 'ug-tag-blue' : 'ug-tag-sail';
     return `
-      <tr class="border-b border-[#D9D9D9] hover:bg-[#e5f5fd]/50 text-xs">
+      <tr class="border-b border-[#D9D9D9] hover:bg-[#e5f5fd]/50 text-xs ${draggable ? 'cursor-move' : ''}"${draggable ? ' draggable="true"' : ''} data-track-id="${t.id}">
         <td class="p-3">
           <div class="flex items-center gap-2">
+            ${draggable
+              ? '<i data-lucide="grip-vertical" class="w-4 h-4 text-[#a1b0c0] flex-shrink-0" title="Przeciągnij, aby zmienić kolejność"></i>'
+              : '<span class="w-4 flex-shrink-0"></span>'}
             <div class="w-7 h-7 bg-[#00214d] flex-shrink-0 flex items-center justify-center text-white text-[10px] overflow-hidden">
               ${t.coverImageUrl ? `<img src="${t.coverImageUrl}" class="w-full h-full object-cover" />` : '♫'}
             </div>
@@ -1380,30 +1397,39 @@ class StudentRadioApp {
           </div>
         </td>
         <td class="p-3 text-[#647391]">${escapeHtml(t.artist)}</td>
+        <td class="p-3"><span class="ug-tag ${sectionTag}">${t.section}</span></td>
         <td class="p-3 font-headings font-bold text-[#032c73]">${t.votes || 0} pkt</td>
         <td class="p-3 text-right">
-          <button onclick="app.removeTrackAdmin('${t.id}')" class="text-[#EF305E] hover:text-[#d9224e] p-1.5 hover:bg-[#EF305E]/10" title="Usuń utwór">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
+          <div class="inline-flex items-center gap-1">
+            <button onclick="app.playAudioSnippet('${t.id}')" class="p-1.5 transition-colors ${isPlaying ? 'bg-[#0041d2] text-white' : 'text-[#0041d2] hover:bg-[#0041d2]/10'}" title="${isPlaying ? 'Zatrzymaj odtwarzanie' : 'Odtwórz próbkę'}">
+              <i data-lucide="${isPlaying ? 'pause' : 'play'}" class="w-4 h-4"></i>
+            </button>
+            <button onclick="app.removeTrackAdmin('${t.id}')" class="text-[#EF305E] hover:text-[#d9224e] p-1.5 hover:bg-[#EF305E]/10" title="Usuń utwór">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
         </td>
       </tr>`;
   }
 
   renderAdminList() {
-    const chart = this.adminTracks.filter((t) => t.section === 'Notowanie');
-    const waiting = this.adminTracks.filter((t) => t.section === 'Poczekalnia');
+    // Jedna wspólna lista: najpierw Notowanie (wg pozycji, przeciągalne), potem Poczekalnia (wg głosów).
+    const chart = this.adminTracks
+      .filter((t) => t.section === 'Notowanie')
+      .sort((a, b) => (a.position == null ? 999 : a.position) - (b.position == null ? 999 : b.position));
+    const waiting = this.adminTracks
+      .filter((t) => t.section === 'Poczekalnia')
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0));
 
-    const chartBody = document.getElementById('admin-chart-table-body');
-    if (chartBody) {
-      chartBody.innerHTML = chart.length
-        ? chart.map((t) => this.adminTrackRow(t)).join('')
-        : '<tr><td colspan="4" class="p-4 text-center text-[#647391] text-xs">Brak utworów w notowaniu.</td></tr>';
-    }
-    const waitingBody = document.getElementById('admin-waiting-table-body');
-    if (waitingBody) {
-      waitingBody.innerHTML = waiting.length
-        ? waiting.map((t) => this.adminTrackRow(t)).join('')
-        : '<tr><td colspan="4" class="p-4 text-center text-[#647391] text-xs">Brak utworów w poczekalni.</td></tr>';
+    const body = document.getElementById('admin-tracks-table-body');
+    if (body) {
+      const rows = [
+        ...chart.map((t) => this.adminTrackRow(t, true)),
+        ...waiting.map((t) => this.adminTrackRow(t, false)),
+      ];
+      body.innerHTML = rows.length
+        ? rows.join('')
+        : '<tr><td colspan="5" class="p-4 text-center text-[#647391] text-xs">Brak utworów.</td></tr>';
     }
 
     // Skrót na "Panel redaktora".
@@ -1411,6 +1437,62 @@ class StudentRadioApp {
     set('dash-chart-count', chart.length);
     set('dash-waiting-count', waiting.length);
     if (this.state.edition) set('dash-edition-num', `#${this.state.edition.number}`);
+
+    this.initChartDragAndDrop();
+  }
+
+  // Drag & drop kolejności w tabeli Notowanie (zapisywane do /admin/chart/reorder).
+  // Bindujemy raz na trwałym <tbody> (renderAdminList podmienia tylko innerHTML).
+  initChartDragAndDrop() {
+    if (!(window.morsData && window.morsData.isAdminPanel)) return;
+    const tbody = document.getElementById('admin-tracks-table-body');
+    if (!tbody || tbody.dataset.dndBound === '1') return;
+    tbody.dataset.dndBound = '1';
+    let draggedId = null;
+
+    tbody.addEventListener('dragstart', (e) => {
+      const tr = e.target.closest('tr[draggable="true"]');
+      if (!tr) return;
+      draggedId = tr.dataset.trackId;
+      tr.classList.add('opacity-40');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', draggedId); } catch (err) { /* IE */ }
+    });
+    tbody.addEventListener('dragend', () => {
+      tbody.querySelectorAll('tr').forEach((tr) => tr.classList.remove('opacity-40'));
+      draggedId = null;
+    });
+    tbody.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const target = e.target.closest('tr[draggable="true"]');
+      const dragged = draggedId ? tbody.querySelector(`tr[data-track-id="${draggedId}"]`) : null;
+      if (!target || !dragged || target === dragged) return;
+      const rect = target.getBoundingClientRect();
+      const after = (e.clientY - rect.top) > rect.height / 2;
+      tbody.insertBefore(dragged, after ? target.nextSibling : target);
+    });
+    tbody.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.persistChartOrder();
+    });
+  }
+
+  // Zapisuje bieżącą kolejność wierszy notowania na serwerze.
+  async persistChartOrder() {
+    const tbody = document.getElementById('admin-tracks-table-body');
+    if (!tbody) return;
+    const order = [...tbody.querySelectorAll('tr[data-track-id]')].map((tr) => tr.dataset.trackId).filter(Boolean);
+    if (!order.length) return;
+    const { ok, data } = await this.apiSend('/admin/chart/reorder', 'POST', { order });
+    if (!ok) {
+      this.showToast((data && data.message) || 'Nie udało się zapisać kolejności.', 'warning');
+    } else {
+      this.showToast('Zapisano nową kolejność notowania.', 'success');
+    }
+    await this.refreshChartState();
+    if (this.adminUser) await this.refreshAdminTracks();
+    this.render();
   }
 
   async removeTrackAdmin(id) {

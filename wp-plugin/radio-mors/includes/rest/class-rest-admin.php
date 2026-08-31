@@ -55,6 +55,12 @@ class Admin {
             'callback'            => [ $this, 'reset_publish' ],
         ] );
 
+        register_rest_route( 'mors/v1', '/admin/chart/reorder', [
+            'methods'             => 'POST',
+            'permission_callback' => $cap,
+            'callback'            => [ $this, 'reorder' ],
+        ] );
+
         $manage = [ $this, 'require_manage' ];
 
         register_rest_route( 'mors/v1', '/admin/editors', [
@@ -122,6 +128,7 @@ class Admin {
                 'status'        => $t['status'],
                 'section'       => $section,
                 'votes'         => $entry ? (int) $entry['votes_count'] : 0,
+                'position'      => ( $entry && $entry['position'] !== null ) ? (int) $entry['position'] : null,
             ];
         }, $rows );
 
@@ -308,6 +315,23 @@ class Admin {
     public function reset_publish( $req ) {
         try {
             $out = ( new Chart_Engine() )->reset_and_publish( get_current_user_id() );
+            return new \WP_REST_Response( $out, 200 );
+        } catch ( \RuntimeException $e ) {
+            return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );
+        }
+    }
+
+    /** POST /admin/chart/reorder — zapis nowej kolejności notowania (drag & drop). Body: { order: [trackId,...] }. */
+    public function reorder( $req ) {
+        $body  = $req->get_json_params();
+        $order = ( isset( $body['order'] ) && is_array( $body['order'] ) )
+            ? array_map( 'sanitize_text_field', $body['order'] )
+            : [];
+        if ( empty( $order ) ) {
+            return new \WP_REST_Response( [ 'success' => false, 'message' => 'Brak kolejności do zapisania.' ], 400 );
+        }
+        try {
+            $out = ( new Chart_Engine() )->reorder_chart( get_current_user_id(), $order );
             return new \WP_REST_Response( $out, 200 );
         } catch ( \RuntimeException $e ) {
             return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );

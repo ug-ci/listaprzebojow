@@ -26,6 +26,20 @@ class Test_Chart_Engine extends Mors_TestCase {
         $this->assertSame( 'FROZEN', ( new \Mors\Db\Editions_Repo() )->current()['status'] );
     }
 
+    public function test_reorder_chart_updates_positions() {
+        $e1 = $this->add_chart_entry( 1, 30 );
+        $e2 = $this->add_chart_entry( 2, 20 );
+        $e3 = $this->add_chart_entry( 3, 10 );
+        $order = [ $e3['track_id'], $e1['track_id'], $e2['track_id'] ];
+
+        $out = ( new \Mors\Domain\Chart_Engine() )->reorder_chart( 1, $order );
+        $this->assertTrue( $out['success'] );
+
+        $entries = ( new \Mors\Db\Entries_Repo() )->chart_by_position( $this->ed['id'] );
+        $ids = array_map( static function ( $e ) { return $e['track_id']; }, $entries );
+        $this->assertSame( $order, $ids );
+    }
+
     public function test_freeze_without_current_edition_throws() {
         global $wpdb;
         $t = \Mors\Db\Schema::table_names();

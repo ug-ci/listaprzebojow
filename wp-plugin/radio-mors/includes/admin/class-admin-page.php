@@ -16,8 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 class Admin_Page {
 
     const MENU_SLUG     = 'radio-mors';
-    const CHART_SLUG    = 'radio-mors-chart';
-    const WAITING_SLUG  = 'radio-mors-waiting';
     const SETTINGS_SLUG = 'radio-mors-settings';
 
     /** Mapa: hook suffix strony => nazwa sekcji SPA (ustawiane w menu(), czytane w assets()). */
@@ -43,12 +41,10 @@ class Admin_Page {
 
         // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Panel redaktora”.
         $dash = add_submenu_page( self::MENU_SLUG, 'Panel redaktora', 'Panel redaktora', $cap, self::MENU_SLUG, [ self::class, 'render' ] );
-        $chart = add_submenu_page( self::MENU_SLUG, 'Notowanie', 'Notowanie', $cap, self::CHART_SLUG, [ self::class, 'render' ] );
-        $waiting = add_submenu_page( self::MENU_SLUG, 'Poczekalnia', 'Poczekalnia', $cap, self::WAITING_SLUG, [ self::class, 'render' ] );
         $settings = add_submenu_page( self::MENU_SLUG, 'Ustawienia listy', 'Ustawienia listy', $cap, self::SETTINGS_SLUG, [ self::class, 'render' ] );
 
         self::$section_by_hook = [];
-        foreach ( [ $top => 'dashboard', $dash => 'dashboard', $chart => 'chart', $waiting => 'waiting', $settings => 'settings' ] as $hook => $section ) {
+        foreach ( [ $top => 'dashboard', $dash => 'dashboard', $settings => 'settings' ] as $hook => $section ) {
             if ( $hook ) { self::$section_by_hook[ $hook ] = $section; }
         }
     }

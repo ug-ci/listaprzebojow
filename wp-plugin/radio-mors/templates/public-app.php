@@ -270,53 +270,30 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
         </div>
       </div>
 
+      <!-- Wszystkie utwory (Notowanie & Poczekalnia) na jednej liście -->
+      <div class="p-6 ug-card">
+        <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-1 flex items-center gap-2">
+          <i data-lucide="list-music" class="w-5 h-5 text-[#0041d2]"></i>
+          <span>Wszystkie utwory (Notowanie & Poczekalnia)</span>
+        </h3>
+        <p class="ug-small !text-xs !text-[#647391] mb-4">Utwory z notowania możesz przeciągać (uchwyt ⋮⋮), aby zmienić ich kolejność.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
+                <th class="p-3">Tytuł</th>
+                <th class="p-3">Wykonawca</th>
+                <th class="p-3">Sekcja</th>
+                <th class="p-3">Głosy</th>
+                <th class="p-3 text-right">Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tracks-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
       </div><!-- /#admin-section-dashboard -->
-
-      <!-- ===== PODSEKCJA: Notowanie ===== -->
-      <div id="admin-section-chart" class="hidden space-y-6">
-        <div class="p-6 ug-card">
-          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
-            <i data-lucide="list-ordered" class="w-5 h-5 text-[#0041d2]"></i>
-            <span>Notowanie — TOP 20</span>
-          </h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
-                  <th class="p-3">Tytuł</th>
-                  <th class="p-3">Wykonawca</th>
-                  <th class="p-3">Głosy</th>
-                  <th class="p-3 text-right">Akcje</th>
-                </tr>
-              </thead>
-              <tbody id="admin-chart-table-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /#admin-section-chart -->
-
-      <!-- ===== PODSEKCJA: Poczekalnia ===== -->
-      <div id="admin-section-waiting" class="hidden space-y-6">
-        <div class="p-6 ug-card">
-          <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73] mb-4 flex items-center gap-2">
-            <i data-lucide="inbox" class="w-5 h-5 text-[#0041d2]"></i>
-            <span>Poczekalnia</span>
-          </h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="border-b border-[#D9D9D9] text-[11px] text-[#647391] uppercase font-headings font-bold">
-                  <th class="p-3">Tytuł</th>
-                  <th class="p-3">Wykonawca</th>
-                  <th class="p-3">Głosy</th>
-                  <th class="p-3 text-right">Akcje</th>
-                </tr>
-              </thead>
-              <tbody id="admin-waiting-table-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /#admin-section-waiting -->
 
       <!-- ===== PODSEKCJA: Ustawienia listy ===== -->
       <div id="admin-section-settings" class="hidden space-y-6">
@@ -613,65 +590,4 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-  <!-- ================= 09. FOOTER (PAGE 15) ================= -->
-  <footer class="mt-auto">
-    <div class="ug-main-footer">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-          <div class="space-y-4">
-            <div class="flex items-center gap-3">
-              <svg viewBox="0 0 100 100" class="w-7 h-7 fill-white" aria-label="Herb UG">
-                <path d="M50 5 C30 5 15 15 15 35 C15 65 50 95 50 95 C50 95 85 65 85 35 C85 15 70 5 50 5 Z" fill="none" stroke="white" stroke-width="6"/>
-                <path d="M35 32 L40 44 L50 34 L60 44 L65 32 L68 50 L32 50 Z" fill="white"/>
-                <path d="M47 54 H53 V60 H59 V66 H53 V72 H47 V66 H41 V60 H47 Z" fill="white"/>
-                <path d="M47 74 H53 V78 H57 V82 H53 V86 H47 V82 H43 V78 H47 Z" fill="white"/>
-              </svg>
-              <span class="font-headings font-bold text-base text-white tracking-tight uppercase">Uniwersytet Gdański</span>
-            </div>
-
-            <div class="text-xs text-slate-200 space-y-1.5 font-body">
-              <p class="font-bold text-white">Rektorat Uniwersytetu Gdańskiego</p>
-              <p>ul. Jana Bażyńskiego 8, 80-309 Gdańsk</p>
-              <p>NIP: 584-020-32-39, REGON: 000001330</p>
-              <p class="pt-2 text-[#a1daf8] font-semibold">tel. portiernia: + 48 58 523 30 00</p>
-              <p class="text-slate-300">Radio MORS Studio: redakcja@mors.ug.edu.pl</p>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="font-headings font-bold text-sm text-white mb-4 uppercase tracking-wider">Informacje dla</h4>
-            <ul class="space-y-2 text-xs text-slate-200 font-body">
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Kandydaci</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Studenci</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Doktoranci</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Absolwenci</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Pracownicy</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Media</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-headings font-bold text-sm text-white mb-4 uppercase tracking-wider">Odnośniki</h4>
-            <ul class="space-y-2 text-xs text-slate-200 font-body">
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Kalendarz akademicki</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Helpdesk</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Gazeta Uniwersytecka</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">BIP</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Biuro Karier UG</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Deklaracja dostępności</a></li>
-              <li><a href="#" class="hover:text-[#a1daf8] transition-colors">Regulamin głosowania Radia MORS</a></li>
-            </ul>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="ug-footer-bottom">
-      <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-300 font-body">
-        Uniwersytet Gdański 2025 • Radio MORS (Mega Otwarte Radio Studenckie) • Wszelkie prawa zastrzeżone
-      </div>
-    </div>
-  </footer>
 </div>
