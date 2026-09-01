@@ -15,8 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 class Admin_Page {
 
-    const MENU_SLUG     = 'radio-mors';
-    const SETTINGS_SLUG = 'radio-mors-settings';
+    const MENU_SLUG     = 'radio-mors';           // „Dodaj utwór” (pierwsza podstrona)
+    const PANEL_SLUG    = 'radio-mors-panel';     // „Panel redaktora”
+    const SETTINGS_SLUG = 'radio-mors-settings';  // „Ustawienia listy”
 
     /** Mapa: hook suffix strony => nazwa sekcji SPA (ustawiane w menu(), czytane w assets()). */
     private static $section_by_hook = [];
@@ -39,12 +40,13 @@ class Admin_Page {
             30
         );
 
-        // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Panel redaktora”.
-        $dash = add_submenu_page( self::MENU_SLUG, 'Panel redaktora', 'Panel redaktora', $cap, self::MENU_SLUG, [ self::class, 'render' ] );
+        // Pierwsze podmenu = ta sama slug, przemianowuje auto-utworzoną pozycję na „Dodaj utwór”.
+        $add = add_submenu_page( self::MENU_SLUG, 'Dodaj utwór', 'Dodaj utwór', $cap, self::MENU_SLUG, [ self::class, 'render' ] );
+        $panel = add_submenu_page( self::MENU_SLUG, 'Panel redaktora', 'Panel redaktora', $cap, self::PANEL_SLUG, [ self::class, 'render' ] );
         $settings = add_submenu_page( self::MENU_SLUG, 'Ustawienia listy', 'Ustawienia listy', $cap, self::SETTINGS_SLUG, [ self::class, 'render' ] );
 
         self::$section_by_hook = [];
-        foreach ( [ $top => 'dashboard', $dash => 'dashboard', $settings => 'settings' ] as $hook => $section ) {
+        foreach ( [ $top => 'add', $add => 'add', $panel => 'dashboard', $settings => 'settings' ] as $hook => $section ) {
             if ( $hook ) { self::$section_by_hook[ $hook ] = $section; }
         }
     }
@@ -108,7 +110,13 @@ class Admin_Page {
         // Sekcja panelu wg bieżącej podstrony — ustawiamy początkową widoczność
         // po stronie serwera (działa nawet zanim/gdyby JS nie przełączył sekcji).
         $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::MENU_SLUG; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        $mors_admin_section = ( $page === self::SETTINGS_SLUG ) ? 'settings' : 'dashboard';
+        if ( $page === self::SETTINGS_SLUG ) {
+            $mors_admin_section = 'settings';
+        } elseif ( $page === self::PANEL_SLUG ) {
+            $mors_admin_section = 'dashboard';
+        } else {
+            $mors_admin_section = 'add';
+        }
 
         echo '<div class="wrap">';
         include MORS_PLUGIN_DIR . 'templates/public-app.php';

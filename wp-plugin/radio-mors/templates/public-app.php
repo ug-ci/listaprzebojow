@@ -161,8 +161,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     <!-- ================= VIEW 3: PANEL ADMINISTRATORA (CMS) ================= -->
     <section id="view-admin" class="hidden space-y-8">
 
-      <!-- ===== PODSEKCJA: Panel redaktora (dodawanie utworu) ===== -->
-      <div id="admin-section-dashboard" class="space-y-8 <?php echo ( isset( $mors_admin_section ) && 'settings' === $mors_admin_section ) ? 'hidden' : ''; ?>">
+      <!-- ===== PODSEKCJA: Dodaj utwór ===== -->
+      <div id="admin-section-add" class="space-y-8 <?php echo ( isset( $mors_admin_section ) && 'add' === $mors_admin_section ) ? '' : 'hidden'; ?>">
 
       <div class="grid grid-cols-1 gap-6">
         <div class="p-6 ug-card space-y-5">
@@ -254,8 +254,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
       </div>
 
-      <!-- Skrót -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-body">
+      </div><!-- /#admin-section-add -->
+
+      <!-- ===== PODSEKCJA: Panel redaktora ===== -->
+      <div id="admin-section-dashboard" class="space-y-8 <?php echo ( isset( $mors_admin_section ) && 'dashboard' === $mors_admin_section ) ? '' : 'hidden'; ?>">
+
+      <!-- Skrót w jednym rzędzie -->
+      <div class="grid grid-cols-3 gap-3 text-xs font-body">
         <div class="p-4 bg-white border border-[#D9D9D9] shadow-sm">
           <div class="text-[#647391]">Bieżące notowanie</div>
           <strong id="dash-edition-num" class="text-[#032c73] text-lg font-headings font-bold">#--</strong>

@@ -96,8 +96,9 @@ class StudentRadioApp {
   // Pokazuje podsekcję panelu zależnie od morsData.adminSection
   // ('dashboard' | 'chart' | 'waiting' | 'settings').
   applyAdminSection() {
-    const active = (MORS.adminSection === 'settings') ? 'settings' : 'dashboard';
-    ['dashboard', 'settings'].forEach((s) => {
+    const valid = ['add', 'dashboard', 'settings'];
+    const active = valid.includes(MORS.adminSection) ? MORS.adminSection : 'add';
+    valid.forEach((s) => {
       const el = document.getElementById('admin-section-' + s);
       if (el) el.classList.toggle('hidden', s !== active);
     });
