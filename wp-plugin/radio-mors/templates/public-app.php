@@ -420,7 +420,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     </div>
     <div class="min-w-0 pr-2">
       <div id="player-track-title" class="font-headings font-bold text-xs text-[#032c73] truncate max-w-[160px]">Odtwarzanie próbki...</div>
-      <div id="player-track-artist" class="ug-small truncate max-w-[160px]">Radio MORS 30s Snippet</div>
+      <div id="player-track-artist" class="ug-small truncate max-w-[160px]">Radio MORS • Odsłuch</div>
     </div>
     <button onclick="app.stopAudio()" id="player-play-toggle" class="p-2 bg-[#e5f5fd] hover:bg-[#a1daf8] text-[#0041d2]" title="Zatrzymaj odsłuch">
       <i data-lucide="square" class="w-4 h-4"></i>

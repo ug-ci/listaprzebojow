@@ -533,23 +533,22 @@ class StudentRadioApp {
     const track = [...this.state.chartTracks, ...this.state.waitingRoomTracks]
       .find((t) => t.id === trackId || t.trackId === trackId) || {};
 
+    if (this.audioTimeout) { clearTimeout(this.audioTimeout); this.audioTimeout = null; }
+
     if (track.audioUrl) {
-      // Utwór ma wgrany prawdziwy plik audio (serwowany z /uploads/audio) — gramy go.
+      // Wgrany plik audio — gramy BEZ limitu czasu (do naturalnego końca utworu).
       this.playCustomAudio(track.audioUrl);
     } else {
-      // Brak pliku — proceduralny syntezator jako podgląd.
+      // Brak pliku — proceduralny syntezator jako podgląd (placeholder nie kończy się sam,
+      // więc ograniczamy go do rozsądnej długości, by nie grał w nieskończoność).
       const audioKey = track.audioKey || 'synth_chill';
       this.generateProceduralSnippet(audioKey);
+      this.audioTimeout = setTimeout(() => this.stopAudio(), 15000);
     }
 
     this.updateMiniPlayer(trackId, track.title, track.artist, true);
     this.renderAudioVisualizers(true);
     this.syncAdminPlayIcons();
-
-    if (this.audioTimeout) clearTimeout(this.audioTimeout);
-    this.audioTimeout = setTimeout(() => {
-      this.stopAudio();
-    }, 15000);
   }
 
   playCustomAudio(src) {
@@ -679,7 +678,7 @@ class StudentRadioApp {
     }
     bar.classList.remove('translate-y-full');
     document.getElementById('player-track-title').innerText = title || 'Odtwarzanie próbki...';
-    document.getElementById('player-track-artist').innerText = artist || 'Radio MORS • Próbka 30s';
+    document.getElementById('player-track-artist').innerText = artist || 'Radio MORS • Odsłuch';
   }
 
   renderAudioVisualizers(isPlaying) {
@@ -1251,7 +1250,7 @@ class StudentRadioApp {
 
           <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
             <button onclick="app.playAudioSnippet('${heroTrack.id}')" class="btn-ug-outlined btn-ug-sm">
-              <i data-lucide="volume-2" class="w-4 h-4 text-[#0041d2]"></i> Odsłuchaj 30s
+              <i data-lucide="volume-2" class="w-4 h-4 text-[#0041d2]"></i> Odsłuchaj
             </button>
             <button onclick="app.toggleVote('${heroTrack.id}')" class="btn-ug-primary ${isHeroSelected ? '!bg-[#1BA345] !border-[#1BA345]' : ''}">
               <i data-lucide="${isHeroSelected ? 'check-circle' : 'vote'}" class="w-4 h-4"></i>
