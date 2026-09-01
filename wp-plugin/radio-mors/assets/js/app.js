@@ -71,7 +71,10 @@ class StudentRadioApp {
     this.startCountdownTimer();
     this.updateAdminAuthUI();
     // W backendzie (wp-admin) otwieramy od razu widok zarządzania (Panel Redaktora).
-    if (MORS.isAdminPanel && this.adminUser) this.switchTab('admin');
+    if (MORS.isAdminPanel && this.adminUser) {
+      this.switchTab('admin');
+      this.loadResetSettings();
+    }
     morsCreateIcons();
   }
 
@@ -114,6 +117,38 @@ class StudentRadioApp {
     set('settings-edition-votes', ed.totalVotesCount != null ? ed.totalVotesCount : 0);
     const ends = ed.endsAt ? new Date(ed.endsAt) : null;
     set('settings-edition-ends', (ends && !isNaN(ends.getTime())) ? ends.toLocaleString('pl-PL') : '--');
+  }
+
+  // Wczytuje harmonogram automatycznego resetu (Ustawienia listy).
+  async loadResetSettings() {
+    const { ok, data } = await this.apiGet('/admin/settings');
+    if (!ok || !data) return;
+    const wd = document.getElementById('reset-weekday');
+    const tm = document.getElementById('reset-time');
+    if (wd && data.resetWeekday != null) wd.value = String(data.resetWeekday);
+    if (tm && data.resetTime) tm.value = data.resetTime;
+    this.renderResetNext(data.nextReset);
+  }
+
+  renderResetNext(iso) {
+    const el = document.getElementById('reset-next');
+    if (!el) return;
+    if (!iso) { el.innerText = '—'; return; }
+    const d = new Date(iso);
+    el.innerText = isNaN(d.getTime()) ? '—' : d.toLocaleString('pl-PL');
+  }
+
+  async saveResetSchedule() {
+    if (!this.adminUser) { this.showToast('Wymagane uprawnienia redaktora.', 'warning'); return; }
+    const wd = document.getElementById('reset-weekday');
+    const tm = document.getElementById('reset-time');
+    const resetWeekday = wd ? parseInt(wd.value, 10) : 5;
+    const resetTime = tm ? tm.value : '18:00';
+    if (!/^\d{2}:\d{2}$/.test(resetTime)) { this.showToast('Podaj poprawną godzinę (HH:MM).', 'warning'); return; }
+    const { ok, data } = await this.apiSend('/admin/settings', 'POST', { resetWeekday, resetTime });
+    if (!ok) { this.showToast((data && data.message) || 'Nie udało się zapisać harmonogramu.', 'warning'); return; }
+    this.showToast('Harmonogram resetu zapisany.', 'success');
+    this.renderResetNext(data.nextReset);
   }
 
   // --- API HELPERS ---

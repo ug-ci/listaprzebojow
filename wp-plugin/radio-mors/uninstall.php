@@ -56,5 +56,10 @@ if ( class_exists( '\\Mors\\Auth\\Capabilities' ) ) {
     }
 }
 
+// Harmonogram automatycznego resetu — wyczyść event WP-Cron i opcje.
+wp_clear_scheduled_hook( 'mors_do_scheduled_reset' );
+delete_option( 'mors_reset_weekday' );
+delete_option( 'mors_reset_time' );
+
 delete_option( 'mors_delete_data_on_uninstall' );
 delete_option( 'mors_db_version' );

@@ -61,6 +61,11 @@ class Admin {
             'callback'            => [ $this, 'reorder' ],
         ] );
 
+        register_rest_route( 'mors/v1', '/admin/settings', [
+            [ 'methods' => 'GET',  'permission_callback' => $cap, 'callback' => [ $this, 'get_settings' ] ],
+            [ 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => [ $this, 'save_settings' ] ],
+        ] );
+
         $manage = [ $this, 'require_manage' ];
 
         register_rest_route( 'mors/v1', '/admin/editors', [
@@ -336,6 +341,30 @@ class Admin {
         } catch ( \RuntimeException $e ) {
             return new \WP_REST_Response( [ 'success' => false, 'message' => $e->getMessage() ], 409 );
         }
+    }
+
+    /** GET /admin/settings — harmonogram automatycznego resetu notowania. */
+    public function get_settings( $req ) {
+        return new \WP_REST_Response( self::settings_payload(), 200 );
+    }
+
+    /** POST /admin/settings — zapis harmonogramu (dzień tygodnia + godzina). */
+    public function save_settings( $req ) {
+        $body    = $req->get_json_params();
+        $weekday = isset( $body['resetWeekday'] ) ? (int) $body['resetWeekday'] : \Mors\Scheduler::DEFAULT_WEEKDAY;
+        $time    = isset( $body['resetTime'] ) ? sanitize_text_field( $body['resetTime'] ) : \Mors\Scheduler::DEFAULT_TIME;
+        \Mors\Scheduler::save( $weekday, $time );
+        return new \WP_REST_Response( array_merge( [ 'success' => true ], self::settings_payload() ), 200 );
+    }
+
+    private static function settings_payload() {
+        $next = \Mors\Scheduler::next_scheduled();
+        return [
+            'success'      => true,
+            'resetWeekday' => \Mors\Scheduler::get_weekday(),
+            'resetTime'    => \Mors\Scheduler::get_time(),
+            'nextReset'    => $next ? gmdate( 'Y-m-d\TH:i:s\Z', (int) $next ) : null,
+        ];
     }
 
     /**

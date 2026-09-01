@@ -338,6 +338,43 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             </button>
           </div>
         </div>
+
+        <div class="p-6 ug-card space-y-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar-clock" class="w-5 h-5 text-[#0041d2]"></i>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Harmonogram automatycznego resetu</h3>
+          </div>
+          <p class="ug-small !text-xs !text-[#647391]">Notowanie zresetuje się automatycznie co tydzień o wybranej porze (czas serwera WordPress).</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div class="ug-form-group">
+              <label class="ug-form-label">Dzień tygodnia</label>
+              <select id="reset-weekday" class="ug-select">
+                <option value="1">Poniedziałek</option>
+                <option value="2">Wtorek</option>
+                <option value="3">Środa</option>
+                <option value="4">Czwartek</option>
+                <option value="5">Piątek</option>
+                <option value="6">Sobota</option>
+                <option value="0">Niedziela</option>
+              </select>
+            </div>
+            <div class="ug-form-group">
+              <label class="ug-form-label">Godzina</label>
+              <input type="time" id="reset-time" class="ug-input" value="18:00" />
+            </div>
+            <div class="flex sm:justify-end">
+              <button onclick="app.saveResetSchedule()" class="btn-ug-primary w-full sm:w-auto">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Zapisz harmonogram</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3 bg-[#F5F5F5] border border-[#D9D9D9] text-xs text-[#647391]">
+            Najbliższy automatyczny reset: <strong id="reset-next" class="text-[#032c73] font-mono">—</strong>
+          </div>
+        </div>
       </div><!-- /#admin-section-settings -->
 
     </section>
