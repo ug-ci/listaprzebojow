@@ -58,7 +58,6 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             <h1 class="ug-h4 !text-xl !font-bold !text-[#032c73]">Lista Przebojów Radia MORS</h1>
             <span id="header-edition-num" class="ug-tag ug-tag-sail text-[11px] font-bold">#--</span>
           </div>
-          <p class="ug-small !text-xs !text-[#647391]">OFICJALNE NOTOWANIE MUZYCZNE UNIWERSYTETU GDAŃSKIEGO</p>
         </div>
       </div>
 
