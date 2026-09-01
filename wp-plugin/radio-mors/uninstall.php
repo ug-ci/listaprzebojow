@@ -61,5 +61,9 @@ wp_clear_scheduled_hook( 'mors_do_scheduled_reset' );
 delete_option( 'mors_reset_weekday' );
 delete_option( 'mors_reset_time' );
 
+// Klucze Cloudflare Turnstile.
+delete_option( 'mors_turnstile_site_key' );
+delete_option( 'mors_turnstile_secret_key' );
+
 delete_option( 'mors_delete_data_on_uninstall' );
 delete_option( 'mors_db_version' );

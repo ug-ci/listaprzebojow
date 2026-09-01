@@ -374,6 +374,33 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
             Najbliższy automatyczny reset: <strong id="reset-next" class="text-[#032c73] font-mono">—</strong>
           </div>
         </div>
+
+        <div class="p-6 ug-card space-y-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-[#1BA345]"></i>
+            <h3 class="ug-h4 !text-lg !font-bold !text-[#032c73]">Weryfikacja antybotowa (Cloudflare Turnstile)</h3>
+          </div>
+          <p class="ug-small !text-xs !text-[#647391]">Klucze utworzysz w panelu Cloudflare → Turnstile. Site Key jest publiczny; Secret Key przechowywany po stronie serwera i nigdzie nie jest pokazywany. Zostaw Secret Key pusty, aby zachować obecny.</p>
+
+          <div class="grid grid-cols-1 gap-4">
+            <div class="ug-form-group">
+              <label class="ug-form-label">Site Key (publiczny)</label>
+              <input type="text" id="turnstile-site" class="ug-input" placeholder="0x4AAA..." autocomplete="off" />
+            </div>
+            <div class="ug-form-group">
+              <label class="ug-form-label">Secret Key (tajny)</label>
+              <input type="password" id="turnstile-secret" class="ug-input" placeholder="•••••••• (wpisz, aby zmienić)" autocomplete="new-password" />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-3">
+            <span id="turnstile-status" class="text-xs text-[#647391]">Status: —</span>
+            <button onclick="app.saveTurnstile()" class="btn-ug-primary">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Zapisz klucze</span>
+            </button>
+          </div>
+        </div>
       </div><!-- /#admin-section-settings -->
 
     </section>
@@ -507,19 +534,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
         <div id="modal-selected-tracks-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
       </div>
 
-      <div class="p-4 bg-[#F5F5F5] border border-[#D9D9D9] flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <input type="checkbox" id="turnstile-check" checked class="w-5 h-5 accent-[#0041d2] cursor-pointer" />
-          <div>
-            <div class="text-xs font-headings font-bold text-[#032c73] flex items-center gap-1.5">
-              <span>Weryfikacja słuchacza</span>
-              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#1BA345]"></i>
-            </div>
-            <p class="ug-small !text-[11px]">Zabezpieczenie przed botami (Cloudflare Turnstile)</p>
-          </div>
-        </div>
-        <div class="text-[10px] text-[#647391] font-mono">ID: 8f3e..2b1c</div>
-      </div>
+      <!-- Cloudflare Turnstile — renderowany przez JS, gdy klucze ustawione w „Ustawienia listy". -->
+      <div id="mors-turnstile" class="flex justify-center"></div>
 
       <div class="p-3 bg-[#FFFBEB] border border-[#FEC001]/50 text-xs text-[#92400E] flex items-start gap-2">
         <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 mt-0.5 text-[#B45309]"></i>

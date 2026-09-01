@@ -48,11 +48,21 @@ class Shortcode {
             true
         );
 
+        // Cloudflare Turnstile (zewnętrzny) — tylko gdy skonfigurowany.
+        wp_register_script(
+            'mors-turnstile-api',
+            'https://challenges.cloudflare.com/turnstile/v0/api.js',
+            [],
+            null,
+            true
+        );
+
         wp_localize_script( self::HANDLE, 'morsData', [
-            'restUrl'     => esc_url_raw( rest_url( 'mors/v1' ) ),
-            'nonce'       => wp_create_nonce( 'wp_rest' ),
-            'isEditor'    => current_user_can( \Mors_Enum::CAP_EDIT_MUSIC ),
-            'isAdminPanel' => false,
+            'restUrl'          => esc_url_raw( rest_url( 'mors/v1' ) ),
+            'nonce'            => wp_create_nonce( 'wp_rest' ),
+            'isEditor'         => current_user_can( \Mors_Enum::CAP_EDIT_MUSIC ),
+            'isAdminPanel'     => false,
+            'turnstileSiteKey' => \Mors\Turnstile::site_key(),
         ] );
     }
 
@@ -61,6 +71,9 @@ class Shortcode {
         wp_enqueue_style( self::HANDLE );
         wp_enqueue_script( 'mors-lucide' );
         wp_enqueue_script( self::HANDLE );
+        if ( '' !== \Mors\Turnstile::site_key() ) {
+            wp_enqueue_script( 'mors-turnstile-api' );
+        }
 
         ob_start();
         include MORS_PLUGIN_DIR . 'templates/public-app.php';

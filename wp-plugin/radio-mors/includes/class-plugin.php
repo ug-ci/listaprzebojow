@@ -10,6 +10,7 @@ class Plugin {
         add_action( 'plugins_loaded', [ '\\Mors\\Upgrader', 'maybe_upgrade' ] );
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
         \Mors\Scheduler::register();
+        \Mors\Turnstile::register();
         \Mors\Frontend\Shortcode::register();
         if ( is_admin() ) {
             \Mors\Admin\Admin_Page::register();

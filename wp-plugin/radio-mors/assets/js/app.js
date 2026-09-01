@@ -128,6 +128,23 @@ class StudentRadioApp {
     if (wd && data.resetWeekday != null) wd.value = String(data.resetWeekday);
     if (tm && data.resetTime) tm.value = data.resetTime;
     this.renderResetNext(data.nextReset);
+
+    const site = document.getElementById('turnstile-site');
+    if (site && data.turnstileSiteKey != null) site.value = data.turnstileSiteKey;
+    const st = document.getElementById('turnstile-status');
+    if (st) st.innerText = data.turnstileConfigured ? 'Status: aktywny ✓' : 'Status: nieaktywny (brak kluczy)';
+  }
+
+  async saveTurnstile() {
+    if (!this.adminUser) { this.showToast('Wymagane uprawnienia redaktora.', 'warning'); return; }
+    const site = (document.getElementById('turnstile-site')?.value || '').trim();
+    const secret = (document.getElementById('turnstile-secret')?.value || '').trim();
+    const { ok, data } = await this.apiSend('/admin/settings', 'POST', { turnstileSiteKey: site, turnstileSecretKey: secret });
+    if (!ok) { this.showToast((data && data.message) || 'Nie udało się zapisać kluczy.', 'warning'); return; }
+    this.showToast('Klucze Turnstile zapisane.', 'success');
+    const sec = document.getElementById('turnstile-secret'); if (sec) sec.value = '';
+    const st = document.getElementById('turnstile-status');
+    if (st) st.innerText = data.turnstileConfigured ? 'Status: aktywny ✓' : 'Status: nieaktywny (brak kluczy)';
   }
 
   renderResetNext(iso) {
@@ -775,7 +792,27 @@ class StudentRadioApp {
         editionLabel.innerText = `Lista Przebojów Radia MORS #${this.state.edition.number}`;
       }
       this.renderSelectedVotesInModal();
+      this.renderTurnstileWidget();
     }
+  }
+
+  // Renderuje/resetuje widget Cloudflare Turnstile w modalu głosowania (jeśli skonfigurowany).
+  renderTurnstileWidget() {
+    this.turnstileToken = null;
+    const el = document.getElementById('mors-turnstile');
+    if (!el || !(window.morsData && window.morsData.turnstileSiteKey) || typeof window.turnstile === 'undefined') return;
+    if (this.turnstileWidgetId != null) {
+      try { window.turnstile.reset(this.turnstileWidgetId); } catch (e) { /* noop */ }
+      return;
+    }
+    try {
+      this.turnstileWidgetId = window.turnstile.render('#mors-turnstile', {
+        sitekey: window.morsData.turnstileSiteKey,
+        callback: (token) => { this.turnstileToken = token; },
+        'error-callback': () => { this.turnstileToken = null; },
+        'expired-callback': () => { this.turnstileToken = null; },
+      });
+    } catch (e) { /* noop */ }
   }
 
   closeSubmitVoteModal() {
@@ -813,7 +850,14 @@ class StudentRadioApp {
     const votedTracks = allTracks.filter((t) => this.selectedVotes.has(t.id));
     const trackIds = [...this.selectedVotes];
 
-    const { ok, status, data } = await this.apiSend('/votes/cast', 'POST', { trackIds });
+    if (window.morsData && window.morsData.turnstileSiteKey && !this.turnstileToken) {
+      this.showToast('Ukończ weryfikację antybotową (Turnstile), aby oddać głos.', 'warning');
+      return;
+    }
+    const body = { trackIds };
+    if (this.turnstileToken) body.turnstileToken = this.turnstileToken;
+
+    const { ok, status, data } = await this.apiSend('/votes/cast', 'POST', body);
 
     if (!ok) {
       if (status === 429 && data.nextEligibleVoteAt) {
@@ -821,9 +865,15 @@ class StudentRadioApp {
         this.applyCooldownUI();
         this.closeSubmitVoteModal();
       }
+      // Token Turnstile jest jednorazowy — po nieudanej próbie resetujemy widget.
+      if (this.turnstileWidgetId != null && typeof window.turnstile !== 'undefined') {
+        try { window.turnstile.reset(this.turnstileWidgetId); } catch (e) { /* noop */ }
+      }
+      this.turnstileToken = null;
       this.showToast(data.message || 'Nie udało się zapisać głosu.', 'warning');
       return;
     }
+    this.turnstileToken = null;
 
     this.cooldownEndTime = new Date(data.nextEligibleVoteAt).getTime();
     this.closeSubmitVoteModal();

@@ -348,22 +348,32 @@ class Admin {
         return new \WP_REST_Response( self::settings_payload(), 200 );
     }
 
-    /** POST /admin/settings — zapis harmonogramu (dzień tygodnia + godzina). */
+    /** POST /admin/settings — zapis harmonogramu resetu + kluczy Turnstile. */
     public function save_settings( $req ) {
         $body    = $req->get_json_params();
         $weekday = isset( $body['resetWeekday'] ) ? (int) $body['resetWeekday'] : \Mors\Scheduler::DEFAULT_WEEKDAY;
         $time    = isset( $body['resetTime'] ) ? sanitize_text_field( $body['resetTime'] ) : \Mors\Scheduler::DEFAULT_TIME;
         \Mors\Scheduler::save( $weekday, $time );
+
+        if ( array_key_exists( 'turnstileSiteKey', $body ) || array_key_exists( 'turnstileSecretKey', $body ) ) {
+            $site   = isset( $body['turnstileSiteKey'] ) ? (string) $body['turnstileSiteKey'] : \Mors\Turnstile::site_key();
+            $secret = isset( $body['turnstileSecretKey'] ) ? (string) $body['turnstileSecretKey'] : '';
+            \Mors\Turnstile::save( $site, $secret );
+        }
+
         return new \WP_REST_Response( array_merge( [ 'success' => true ], self::settings_payload() ), 200 );
     }
 
     private static function settings_payload() {
         $next = \Mors\Scheduler::next_scheduled();
         return [
-            'success'      => true,
-            'resetWeekday' => \Mors\Scheduler::get_weekday(),
-            'resetTime'    => \Mors\Scheduler::get_time(),
-            'nextReset'    => $next ? gmdate( 'Y-m-d\TH:i:s\Z', (int) $next ) : null,
+            'success'             => true,
+            'resetWeekday'        => \Mors\Scheduler::get_weekday(),
+            'resetTime'           => \Mors\Scheduler::get_time(),
+            'nextReset'           => $next ? gmdate( 'Y-m-d\TH:i:s\Z', (int) $next ) : null,
+            // Site Key jest publiczny; Secret NIGDY nie jest zwracany — tylko flaga „ustawiony”.
+            'turnstileSiteKey'    => \Mors\Turnstile::site_key(),
+            'turnstileConfigured' => \Mors\Turnstile::enabled(),
         ];
     }
 
