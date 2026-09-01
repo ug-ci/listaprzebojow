@@ -105,6 +105,11 @@ class Admin_Page {
     }
 
     public static function render() {
+        // Sekcja panelu wg bieżącej podstrony — ustawiamy początkową widoczność
+        // po stronie serwera (działa nawet zanim/gdyby JS nie przełączył sekcji).
+        $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : self::MENU_SLUG; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $mors_admin_section = ( $page === self::SETTINGS_SLUG ) ? 'settings' : 'dashboard';
+
         echo '<div class="wrap">';
         include MORS_PLUGIN_DIR . 'templates/public-app.php';
         echo '</div>';

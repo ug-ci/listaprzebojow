@@ -162,7 +162,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
     <section id="view-admin" class="hidden space-y-8">
 
       <!-- ===== PODSEKCJA: Panel redaktora (dodawanie utworu) ===== -->
-      <div id="admin-section-dashboard" class="space-y-8">
+      <div id="admin-section-dashboard" class="space-y-8 <?php echo ( isset( $mors_admin_section ) && 'settings' === $mors_admin_section ) ? 'hidden' : ''; ?>">
 
       <div class="grid grid-cols-1 gap-6">
         <div class="p-6 ug-card space-y-5">
@@ -296,7 +296,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
       </div><!-- /#admin-section-dashboard -->
 
       <!-- ===== PODSEKCJA: Ustawienia listy ===== -->
-      <div id="admin-section-settings" class="hidden space-y-6">
+      <div id="admin-section-settings" class="space-y-6 <?php echo ( isset( $mors_admin_section ) && 'settings' === $mors_admin_section ) ? '' : 'hidden'; ?>">
         <div class="p-6 ug-card space-y-5">
           <div class="flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#0041d2]"></i>
